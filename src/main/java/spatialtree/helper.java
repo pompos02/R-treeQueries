@@ -2,7 +2,11 @@ package main.java.spatialtree;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class helper {
@@ -28,29 +32,7 @@ public class helper {
         ObjectInputStream is = new ObjectInputStream(in);
         return is.readObject();
     }
-    static int calculateMaxRecordsInBlock() {
-        ArrayList<Record> blockRecords = new ArrayList<>();
-        int i;
-        for (i = 0; i < Integer.MAX_VALUE; i++) {
-            ArrayList<Double> coordinateForEachDimension = new ArrayList<>();
-            for (int d = 0; d < dataDimensions; d++)
-                coordinateForEachDimension.add(0.0);
-            Record record = new Record(0, "test",coordinateForEachDimension);
-            blockRecords.add(record);
-            byte[] recordInBytes = new byte[0];
-            byte[] recordLength = new byte[0];
-            try {
-                recordInBytes = serialize(blockRecords);
-                recordLength = serialize(recordInBytes.length);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (recordLength.length + recordInBytes.length > BLOCK_SIZE)
-                break;
-        }
-        System.out.println("The Max records In each blocks are: "+ i);
-        return i;
-    }
+
     static void updateMetaData(String pathToFile) {
         try {
             ArrayList<Integer> dataFileMetaData = new ArrayList<>();
@@ -99,8 +81,52 @@ public class helper {
         }
         return null;
     }
+    /**
+     * Converts a SpatialDataEntry to a Record object.
+     * @param entry The SpatialDataEntry to convert.
+     * @return A new Record based on the entry data.
+     */
+    private static Record convertEntryToRecord(SpatialDataEntry entry) {
+        // Assuming Record constructor or factory method takes similar parameters
+        return new Record(entry.getId(), entry.getName(), entry.getCoordinates());
+    }
+
+    /**
+     * Initializes or resets the data file and writes spatial data entries into it.
+     * @param entries List of SpatialDataEntry objects to write into the file.
+     * @param dataDimensions The number of dimensions each data entry uses.
+     * @param makeNewDataFile Flag to determine if a new file should be created.
+     */
+    static void CreateDataFile(List<SpatialDataEntry> entries, int dataDimensions, boolean makeNewDataFile) {
+        try {
+            if (makeNewDataFile) {
+                Files.deleteIfExists(Paths.get(PATH_TO_DATAFILE)); // Resetting/Deleting dataFile data
+            }
+            helper.dataDimensions=dataDimensions;
+            if (dataDimensions <= 0)
+                throw new IllegalStateException("The number of data dimensions must be a positive integer");
 
 
+            updateMetaData(PATH_TO_DATAFILE);
+
+            ArrayList<Record> blockRecords = new ArrayList<>();
+            int currentBlockSize=0;
+            for (SpatialDataEntry entry : entries) {
+                byte [] recordBytes = serialize(convertEntryToRecord(entry));
+                if (currentBlockSize + recordBytes.length > BLOCK_SIZE) {
+                    writeDataFileBlock(blockRecords);
+                    blockRecords = new ArrayList<>();
+                    currentBlockSize = 0;
+                }
+                blockRecords.add(convertEntryToRecord(entry));
+                currentBlockSize+=recordBytes.length;
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public static void writeDataFileBlock(ArrayList<Record> blockRecords) {
         try {
             byte[] recordInBytes = serialize(blockRecords);

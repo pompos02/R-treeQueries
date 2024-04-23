@@ -13,6 +13,7 @@ public class SpatialDataEntry {
      * @param name The name of the location or point of interest.
      * @param coordinates The coordinates of the entry in a multi-dimensional space.
      */
+
     public SpatialDataEntry(long  id, String name, ArrayList<Double> coordinates) {
         this.id = id;
         this.name = name;
