@@ -30,7 +30,7 @@ public class Record implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder recordToString = new StringBuilder(id + "," + coordinates.get(0));
+        StringBuilder recordToString = new StringBuilder(id + "," + name + "," + coordinates.get(0));
         for(int i = 1; i < coordinates.size(); i++)
             recordToString.append(",").append(coordinates.get(i));
         return String.valueOf(recordToString);

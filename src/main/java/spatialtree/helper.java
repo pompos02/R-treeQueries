@@ -23,12 +23,12 @@ public class helper {
     }
 
     // Used to deserializable a byte array to a serializable Object
-     static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
+    static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
         ByteArrayInputStream in = new ByteArrayInputStream(data);
         ObjectInputStream is = new ObjectInputStream(in);
         return is.readObject();
     }
-     static int calculateMaxRecordsInBlock() {
+    static int calculateMaxRecordsInBlock() {
         ArrayList<Record> blockRecords = new ArrayList<>();
         int i;
         for (i = 0; i < Integer.MAX_VALUE; i++) {
@@ -51,7 +51,7 @@ public class helper {
         System.out.println("The Max records In each blocks are: "+ i);
         return i;
     }
-     static void updateMetaData(String pathToFile) {
+    static void updateMetaData(String pathToFile) {
         try {
             ArrayList<Integer> dataFileMetaData = new ArrayList<>();
             dataFileMetaData.add(dataDimensions);
@@ -116,5 +116,28 @@ public class helper {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    static ArrayList<Record> readDataFile(int blockId){
+        try {
+            RandomAccessFile raf = new RandomAccessFile(new File(PATH_TO_DATAFILE), "r");
+            FileInputStream fis = new FileInputStream(raf.getFD());
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            //go to the expected block
+            raf.seek(blockId*BLOCK_SIZE);
+            byte[] block = new byte[BLOCK_SIZE];
+            bis.read(block,0,BLOCK_SIZE);
+            byte[] LengthInBytes = serialize( Integer.parseInt("1")); // producing the integer size
+            System.arraycopy(block, 0, LengthInBytes, 0, LengthInBytes.length);
+
+            byte[] recordsInBlock = new byte[(Integer)deserialize(LengthInBytes)];
+            System.arraycopy(block, LengthInBytes.length, recordsInBlock, 0, recordsInBlock.length);
+
+            return (ArrayList<Record>)deserialize(recordsInBlock);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

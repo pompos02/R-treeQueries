@@ -66,7 +66,6 @@ public class DataFileManager {
         }
         if (!entries.isEmpty()) {
             System.out.println( "Number of entries: "+entries.size());
-            System.out.println( "1st entry "+entries.get(0).toString());
         }
         return entries;
     }
