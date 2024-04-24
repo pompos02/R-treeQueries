@@ -18,22 +18,17 @@ public class RStarTree {
     // If insertRecordsFromDataFile parameter is true then makes a new root node since we are resetting the tree and inserting the records from the datafile
     public RStarTree(boolean insertRecordsFromDataFile) {
         this.totalLevels = helper.getTotalLevelsOfTreeIndex(); // Initialise the total levels from the FileHelper class, in case there is an already existing indexFile
-        System.out.println("Starting RStarTree " ); // Debug output
 
         if (insertRecordsFromDataFile)
         {
             helper.writeNewIndexFileBlock(new Node(1)); // Initialising the root node
-            System.out.println("root node initialized"); // Debug output
             // Adding the data of datafile in the RStarTree (to the indexFile)
-            System.out.println("Writing on Index, the total blocks are: "+helper.getTotalBlocksInDatafile()); // Debug output
             for (int i = 1; i< helper.getTotalBlocksInDatafile(); i++)
             {
                 ArrayList<Record> records = helper.readDataFile(i);
-                System.out.println("how many records: "+ records.size()); // Debug output
                 if (records != null)
                 {
                     for (Record record : records) {
-                        System.out.println("inserting record from block:"+i); // Debug output
                         insertRecord(record, i);
                     }
                 }
@@ -164,7 +159,6 @@ public class RStarTree {
 
 
     private void insertRecord(Record record, long datafileBlockId) {
-        System.out.println("Inserting record ID: " + record.getId()); // Debug output
         ArrayList<Bounds> boundsForEachDimension = new ArrayList<>();
         // Since we have to do with points as records we set low and upper to be same
         for (int d = 0; d < helper.getDataDimensions(); d++)

@@ -24,6 +24,7 @@ public class Bounds implements Serializable {
         return lower;
     }
 
+
     double getUpper() {
         return upper;
     }

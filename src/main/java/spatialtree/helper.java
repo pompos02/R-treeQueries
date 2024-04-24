@@ -136,7 +136,7 @@ public class helper {
         }
     }
 
-    static void CreateIndexFile(int dataDimensions, boolean makeNewDataFile) throws IOException {
+    public static void CreateIndexFile(int dataDimensions, boolean makeNewDataFile) throws IOException {
         try {
             if (makeNewDataFile) {
                 Files.deleteIfExists(Paths.get(PATH_TO_DATAFILE)); // Resetting/Deleting dataFile data
