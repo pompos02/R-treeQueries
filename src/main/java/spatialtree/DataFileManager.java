@@ -18,8 +18,8 @@ public class DataFileManager {
      * @param filePath The path to the OSM file.
      * @return a list of SpatialDataEntry objects parsed from the file.
      */
-    public static List<SpatialDataEntry> loadDataFromFile(String filePath) {
-        List<SpatialDataEntry> entries = new ArrayList<>();
+    public static List<Record> loadDataFromFile(String filePath) {
+        List<Record> entries = new ArrayList<>();
         XMLInputFactory factory = XMLInputFactory.newInstance();
 
         try {
@@ -54,7 +54,7 @@ public class DataFileManager {
 
                     // Only add entries with a non-empty name
                     if (!name.isEmpty()) {
-                        SpatialDataEntry entry = new SpatialDataEntry(id, name, coordinates);
+                        Record entry = new Record(id, name, coordinates);
                         entries.add(entry);
                     }
                 }
