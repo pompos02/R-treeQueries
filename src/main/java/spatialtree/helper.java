@@ -5,9 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class helper {
 
@@ -65,7 +63,7 @@ public class helper {
     static int getDataDimensions() {
         return dataDimensions;
     }
-    static int getTotalLevelsOfTreeIndex() {
+    public static int getTotalLevelsOfTreeIndex() {
         return totalLevelsOfTreeIndex;
     }
 
@@ -318,5 +316,29 @@ public class helper {
             e.printStackTrace();
         }
         return null;
+    }
+    public static void RecordSorterX(List<Record> records){
+        Collections.sort(records, new Comparator<Record>() {
+            @Override
+            public int compare(Record r1, Record r2) {
+                return Double.compare(r1.getCoordinate(0), r2.getCoordinate(0));
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        // Example usage
+        ArrayList<Record> records = new ArrayList<>();
+        records.add(new Record(1, "Record A", new ArrayList<Double>(List.of(3.0, 4.0))));
+        records.add(new Record(2, "Record B", new ArrayList<Double>(List.of(1.0, 2.0))));
+        records.add(new Record(3, "Record C", new ArrayList<Double>(List.of(2.0, 3.0))));
+
+        System.out.println("Before sorting:");
+        records.forEach(System.out::println);
+
+        RecordSorterX(records);
+
+        System.out.println("After sorting:");
+        records.forEach(System.out::println);
     }
 }

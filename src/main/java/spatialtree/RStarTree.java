@@ -7,11 +7,11 @@ import java.util.Collections;
 
 public class RStarTree {
 
-    private int totalLevels; // The total levels of the tree, increasing the size starting of the root, the root (top level) will always have the highest level
+    private static int totalLevels; // The total levels of the tree, increasing the size starting of the root, the root (top level) will always have the highest level
     private boolean[] levelsInserted; // Used for information on  which levels have already called overFlowTreatment on a data insertion procedure
     private static final int ROOT_NODE_BLOCK_ID = 1; // Root node will always have 1 as it's ID, in order to identify which block has the root Node
     private static final int LEAF_LEVEL = 1; // Constant leaf level 1, since we are increasing the level from the root, the root (top level) will always have the highest level
-    private static final int CHOOSE_SUBTREE_P_ENTRIES = 32;
+    private static final int CHOOSE_SUBTREE_P_ENTRIES = 35;
     private static final int REINSERT_P_ENTRIES = (int) (0.30 * Node.getMaxEntries()); // Setting p to 30% of max entries
 
     // RStarTree constructor
@@ -36,105 +36,7 @@ public class RStarTree {
                     throw new IllegalStateException("Could not read records properly from the datafile");
             }
         }
-//        ArrayList<Double> recCoordinates = new ArrayList<>();
-//        recCoordinates.add(-100.0);
-//        recCoordinates.add(1.0);
-//        insertRecord(new Record(1, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(-80.0);
-//        recCoordinates.add(-1.0);
-//        insertRecord(new Record(2, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(4.0);
-//        recCoordinates.add(1.0);
-//        insertRecord(new Record(3, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(5.0);
-//        recCoordinates.add(0.0);
-//        insertRecord(new Record(4, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(14.0);
-//        recCoordinates.add(1.0);
-//        insertRecord(new Record(5, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(2.0);
-//        recCoordinates.add(1.0);
-//        insertRecord(new Record(6, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(2.0);
-//        recCoordinates.add(0.1);
-//        insertRecord(new Record(7, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(-101.0);
-//        recCoordinates.add(0.1);
-//        insertRecord(new Record(8, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(-102.0);
-//        recCoordinates.add(0.1);
-//        insertRecord(new Record(9, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(-125.0);
-//        recCoordinates.add(1.0);
-//        insertRecord(new Record(10, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(9.0);
-//        recCoordinates.add(0.9);
-//        insertRecord(new Record(11, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(-1.0);
-//        recCoordinates.add(0.0);
-//        insertRecord(new Record(12, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(23.0);
-//        recCoordinates.add(1.7);
-//        insertRecord(new Record(13, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(12.0);
-//        recCoordinates.add(10.0);
-//        insertRecord(new Record(14, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(20.0);
-//        recCoordinates.add(-2.0);
-//        insertRecord(new Record(15, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(2.0);
-//        recCoordinates.add(-0.1);
-//        insertRecord(new Record(16, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(-1.0);
-//        recCoordinates.add(-2.0);
-//        insertRecord(new Record(17, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(1.0);
-//        recCoordinates.add(1.0);
-//        insertRecord(new Record(18, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(15.0);
-//        recCoordinates.add(-1.0);
-//        insertRecord(new Record(19, recCoordinates),2);
-//
-//        recCoordinates = new ArrayList<>();
-//        recCoordinates.add(-136.0);
-//        recCoordinates.add(1.0);
-//        insertRecord(new Record(20, recCoordinates),2);
+
     }
 
     Node getRoot() {
@@ -149,6 +51,9 @@ public class RStarTree {
         return LEAF_LEVEL;
     }
 
+    public static int gettotalLevels(){
+        return totalLevels;
+    }
     // Query which returns the ids of the K Records that are closer to the given point
 
 
@@ -305,7 +210,7 @@ public class RStarTree {
 
     // Algorithm OverflowTreatment
     private Entry overFlowTreatment(Node parentNode, Entry parentEntry, Node childNode) {
-
+        //System.out.println("OVERFLOW TREATMENT CALLED");
         // If the level is not the root level and this is the first call of OverflowTreatment
         // in the given level during the insertion of one data rectangle, then reinsert
         if (childNode.getBlockId() != ROOT_NODE_BLOCK_ID && !levelsInserted[childNode.getLevel()-1])

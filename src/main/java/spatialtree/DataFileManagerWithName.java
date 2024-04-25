@@ -11,7 +11,7 @@ import javax.xml.stream.XMLStreamReader;
 /**
  * This class is responsible for loading spatial data from an OSM XML file.
  */
-public class DataFileManager {
+public class DataFileManagerWithName {
 
     /**
      * Loads spatial data from an OSM file using StAX for efficient memory usage.

@@ -39,4 +39,8 @@ public class LeafEntry extends Entry {
         return null;
 
     }
+    @Override
+    public boolean isLeaf() {
+        return true; // This is a leaf node
+    }
 }

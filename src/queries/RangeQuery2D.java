@@ -23,7 +23,7 @@ public class RangeQuery2D {
 
 
 
-        List<Record> records = DataFileManager.loadDataFromFile("cyprus.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("DONE");
@@ -33,7 +33,7 @@ public class RangeQuery2D {
         System.out.println("creating r*-tree");
         RStarTree rStarTree = new RStarTree(true);
         System.out.println("DONE");
-
+        System.out.println("TOTAL LEVELS: " + helper.getTotalLevelsOfTreeIndex());
         //lat="34.7018620" lon="33.0449947
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
@@ -44,6 +44,7 @@ public class RangeQuery2D {
         long startRangeQueryTime = System.nanoTime();
         ArrayList<LeafEntry> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
         long stopRangeQueryTime = System.nanoTime();
+        System.out.print("range query Done ");
         System.out.println("Entires found in the given region: " + queryRecords.size());
         System.out.println("writing them to output2DRangeQuery.csv ");
         try (FileWriter csvWriter = new FileWriter("output2DRangeQuery.csv")) {

@@ -28,6 +28,7 @@ public class Record implements Serializable {
         return coordinates.get(dimension);
     }
 
+
     @Override
     public String toString() {
         StringBuilder recordToString = new StringBuilder(id + "," + name + "," + coordinates.get(0));

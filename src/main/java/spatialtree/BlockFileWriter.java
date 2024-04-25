@@ -14,7 +14,7 @@ public class BlockFileWriter {
 
     //  testing if the BlockFileWriter works as expected
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        List<Record> records = DataFileManager.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
         helper.CreateDataFile(records,2,true);
         ArrayList<Integer> metaData = helper.readMetaData(helper.PATH_TO_DATAFILE);
 
@@ -27,7 +27,7 @@ public class BlockFileWriter {
             ArrayList<Record> records1 = helper.readDataFile(blockId);
             if (records1 != null && !records1.isEmpty()) {
 
-                //System.out.println("Records from Block " + blockId + ":");
+                System.out.println("Records from Block " + blockId + ":");
                 for (Record record : records1) {
                     System.out.println(record.toString());
                     NumberOfRecords=NumberOfRecords+1;

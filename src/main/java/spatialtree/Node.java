@@ -2,14 +2,15 @@ package main.java.spatialtree;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 
 // Class representing a Node of the RStarTree
-public class Node implements Serializable {
-    private static final int MAX_ENTRIES = helper.calculateMaxEntriesInNode(); // The maximum entries that a Node can fit based on the file parameters
-    private static final int MIN_ENTRIES = (int)(0.4 * MAX_ENTRIES); // Setting m to 40%
-    private int level; // The level of the tree that this Node is located
-    private long blockId; // The unique ID of the file block that this Node refers to
-    private ArrayList<Entry> entries; // The ArrayList with the Entries of the Node
+    public class Node implements Serializable {
+        private static final int MAX_ENTRIES = helper.calculateMaxEntriesInNode(); // The maximum entries that a Node can fit based on the file parameters
+        private static final int MIN_ENTRIES = (int)(0.4 * MAX_ENTRIES); // Setting m to 40%
+        private int level; // The level of the tree that this Node is located
+        private long blockId; // The unique ID of the file block that this Node refers to
+        private ArrayList<Entry> entries; // The ArrayList with the Entries of the Node
 
     // Root constructor with it's level as a parameter which makes a new empty ArrayList for the Node
     Node(int level) {
@@ -60,6 +61,38 @@ public class Node implements Serializable {
         ArrayList<Distribution> splitAxisDistributions = chooseSplitAxis();
         return chooseSplitIndex(splitAxisDistributions);
     }
+
+    public ArrayList<Bounds> calculateBoundingBoxForNode(ArrayList<Entry> entries) {
+        if (entries.isEmpty()) {
+            throw new IllegalArgumentException("Entries list cannot be empty");
+        }
+
+        // Get the dimensionality from the first entry
+        int dimensions = helper.getDataDimensions();
+        ArrayList<Bounds> combinedBounds = new ArrayList<>(Collections.nCopies(dimensions, null));
+
+        // Initialize combinedBounds with extreme values to be reduced in the loops
+        for (int i = 0; i < dimensions; i++) {
+            combinedBounds.set(i, new Bounds(Double.MAX_VALUE, -Double.MAX_VALUE));
+        }
+
+        // Calculate minimum and maximum for each dimension across all entries
+        for (Entry entry : entries) {
+
+            ArrayList<Bounds> entryBounds = entry.getBoundingBoxArray();
+            for (int d = 0; d < dimensions; d++) {
+                Bounds currentBounds = entryBounds.get(d);
+                Bounds existingBounds = combinedBounds.get(d);
+                double newLower = Math.min(existingBounds.getLower(), currentBounds.getLower());
+                double newUpper = Math.max(existingBounds.getUpper(), currentBounds.getUpper());
+                combinedBounds.set(d, new Bounds(newLower, newUpper));
+            }
+        }
+
+        return combinedBounds;
+    }
+
+
 
     // Returns the distributions of the best Axis
     private ArrayList<Distribution> chooseSplitAxis() {
@@ -164,4 +197,7 @@ public class Node implements Serializable {
         splitNodes.add(new Node(level,secondGroup.getEntries()));
         return splitNodes;
     }
+
+
+
 }

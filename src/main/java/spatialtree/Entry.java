@@ -21,12 +21,21 @@ public class Entry implements Serializable {
         this.boundingBox = boundingBox;
     }
 
+    public Entry(BoundingBox bb, long blockId) {
+        this.boundingBox=bb;
+        this.childNodeBlockId=blockId;
+    }
+
     void setChildNodeBlockId(Long childNodeBlockId) {
         this.childNodeBlockId = childNodeBlockId;
     }
 
     public BoundingBox getBoundingBox() {
         return boundingBox;
+    }
+
+    public ArrayList<Bounds> getBoundingBoxArray() {
+        return boundingBox.getBounds();
     }
 
     public Long getChildNodeBlockId() {
@@ -43,5 +52,9 @@ public class Entry implements Serializable {
     // that also enclose the given Entry parameter entryToInclude
     void adjustBBToFitEntry(Entry entryToInclude){
         boundingBox = new BoundingBox(Bounds.findMinimumBounds(boundingBox,entryToInclude.getBoundingBox()));
+    }
+
+    public boolean isLeaf() {
+        return false; // Default implementation for non-leaf nodes
     }
 }
