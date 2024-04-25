@@ -5,6 +5,7 @@ import main.java.spatialtree.Record;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.FileWriter;
 
 public class RangeQuery2D {
     public static void main(String[] args) throws IOException {
@@ -23,46 +24,47 @@ public class RangeQuery2D {
 
 
         List<Record> records = DataFileManager.loadDataFromFile("cyprus.osm");
-
+        System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
+        System.out.println("DONE");
+        System.out.println("creating index file: ");
         helper.CreateIndexFile(2,false);
+        System.out.println("DONE");
+        System.out.println("creating r*-tree");
         RStarTree rStarTree = new RStarTree(true);
+        System.out.println("DONE");
 
-
+        //lat="34.7018620" lon="33.0449947
         ArrayList<Bounds> queryBounds = new ArrayList<>();
-        queryBounds.add(new Bounds(35.1014243 , 37.1014243 + 0.67));
-        queryBounds.add(new Bounds(33.0938391 - 0.67, 37.0938391 + 0.67));
+        queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
+        queryBounds.add(new Bounds(33.0449947 - 0.67, 33.0449947 + 0.67));
 
 
-        System.out.print("R Star - Range Query: ");
+        System.out.print("Starting range query: ");
         long startRangeQueryTime = System.nanoTime();
-        ArrayList<Long> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
+        ArrayList<LeafEntry> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
         long stopRangeQueryTime = System.nanoTime();
-        //for (Long id : queryRecords)
-           // System.out.print(id + ", ");
-        System.out.println();
-        System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1000000 + " ms");
+        System.out.println("Entires found in the given region: " + queryRecords.size());
+        System.out.println("writing them to output2DRangeQuery.csv ");
+        try (FileWriter csvWriter = new FileWriter("output2DRangeQuery.csv")) {
+            // Write the CSV header
+            csvWriter.append("ID,Name,Latitude,Longitude \n");
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("rangeQueryResults.csv"))) {
-            String tagString = "Rectangle's Area" +
-                    ',' +
-                    "Returned Records" +
-                    ',' +
-                    "R* Time(ms)" +
-                    ',' +
-                    "Sequential Scan Time(ms)" +
-                    '\n';
-            writer.write(tagString);
-
-            // Range Query File creation
-           // int j = 0;
-           // while(j < queryRecords.size()){
-               // writer.write(String.format("rangeQueryRecords.get(j) +"," +rStarRangeQueryTimes.get(j)+ "," + seqScanRangeQueryTimes.get(j) + "\n"));
-                //j++;
-
-            //}
+            // Loop through records and write each to the file
+            int counter=0;
+            for (LeafEntry leafRecord : queryRecords) {
+                counter++;
+                // Assuming findRecord() returns a comma-separated string "id,name,lat,lon"
+                csvWriter.append(counter + ". " + leafRecord.findRecord().toString());
+                csvWriter.append("\n");  // New line after each record
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error writing to CSV file: " + e.getMessage());
         }
+        System.out.println(queryRecords.size());
+        System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
+
+
     }
+
 }

@@ -158,7 +158,7 @@ public class RStarTree {
     // Query which returns the ids of the Records that are inside the radius of the given point
 
 
-    private void insertRecord(Record record, long datafileBlockId) {
+    private void insertRecord(Record record, int datafileBlockId) {
         ArrayList<Bounds> boundsForEachDimension = new ArrayList<>();
         // Since we have to do with points as records we set low and upper to be same
         for (int d = 0; d < helper.getDataDimensions(); d++)
@@ -168,7 +168,7 @@ public class RStarTree {
         insert(null, null, new LeafEntry(record.getId(), datafileBlockId, boundsForEachDimension), LEAF_LEVEL); // Inserting on leaf level since it's a new record
     }
 
-    public ArrayList<Long> getDataInBoundingBox(BoundingBox searchBoundingBox){
+    public ArrayList<LeafEntry> getDataInBoundingBox(BoundingBox searchBoundingBox){
         BoundingBoxRangeQuery query = new BoundingBoxRangeQuery(searchBoundingBox);
         return query.getQueryRecordIds(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
     }

@@ -205,7 +205,7 @@ public class helper {
             ArrayList<Bounds> boundsForEachDimension = new ArrayList<>();
             for (int d = 0; d < dataDimensions; d++)
                 boundsForEachDimension.add(new Bounds(0.0, 0.0));
-            Entry entry = new LeafEntry(new Random().nextLong(),new Random().nextLong(), boundsForEachDimension);
+            Entry entry = new LeafEntry(new Random().nextLong(),new Random().nextInt(), boundsForEachDimension);
             entry.setChildNodeBlockId(new Random().nextLong());
             entries.add(entry);
             byte[] nodeInBytes = new byte[0];
@@ -266,15 +266,6 @@ public class helper {
 
     static int getTotalBlocksInDatafile() {
         ArrayList<Integer> metaData = helper.readMetaData(helper.PATH_TO_DATAFILE);
-
-        // Check if metadata is not null and print it
-        if (metaData != null) {
-            for (Integer data : metaData) {
-                System.out.println(data); // 1st data dimensions 2nd block size 3rd total blocks
-            }
-        } else {
-            System.out.println("Failed to read metadata or metadata is empty.");
-        }
         return metaData.get(2)-1;
     }
 

@@ -1,13 +1,14 @@
 package queries;
 
 import main.java.spatialtree.*;
+import main.java.spatialtree.Record;
 
 import java.util.ArrayList;
 
 // Class used for executing a range query withing a specific bounding box with the use of the RStarTree
 // Searches for records within that bounding box
 public class BoundingBoxRangeQuery extends Query {
-    private ArrayList<Long> qualifyingRecordIds; // Record ids used for queries
+    private ArrayList<LeafEntry> qualifyingRecord; // Record ids used for queries
     private BoundingBox searchBoundingBox; // BoundingBox used for range queries
 
     public BoundingBoxRangeQuery(BoundingBox searchBoundingBox) {
@@ -16,10 +17,10 @@ public class BoundingBoxRangeQuery extends Query {
 
     // Returns the ids of the query's records
     @Override
-    public ArrayList<Long> getQueryRecordIds(Node node){
-        qualifyingRecordIds = new ArrayList<>();
+    public ArrayList<LeafEntry> getQueryRecordIds(Node node){
+        qualifyingRecord = new ArrayList<>();
         search(node);
-        return qualifyingRecordIds;
+        return qualifyingRecord;
     }
 
     // Search for records within searchBoundingBox
@@ -47,7 +48,7 @@ public class BoundingBoxRangeQuery extends Query {
                 if (BoundingBox.checkOverlap(entry.getBoundingBox(),searchBoundingBox))
                 {
                     LeafEntry leafEntry = (LeafEntry) entry;
-                    qualifyingRecordIds.add(leafEntry.getRecordId());
+                    qualifyingRecord.add(leafEntry);
                 }
             }
     }

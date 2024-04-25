@@ -18,15 +18,7 @@ public class BlockFileWriter {
         helper.CreateDataFile(records,2,true);
         ArrayList<Integer> metaData = helper.readMetaData(helper.PATH_TO_DATAFILE);
 
-        // Check if metadata is not null and print it
-        if (metaData != null) {
-            System.out.println("Metadata from " + helper.PATH_TO_DATAFILE + ":");
-            for (Integer data : metaData) {
-                System.out.println(data); // 1st data dimensions 2nd block size 3rd total blocks
-            }
-        } else {
-            System.out.println("Failed to read metadata or metadata is empty.");
-        }
+
         // Read and print each block's records
         System.out.println("Writing on Index, the total blocks are: "+helper.getTotalBlocksInDatafile()); // Debug output
         int totalBlocks = metaData.get(2)-1; // total blocks
@@ -37,7 +29,7 @@ public class BlockFileWriter {
 
                 //System.out.println("Records from Block " + blockId + ":");
                 for (Record record : records1) {
-                    //System.out.println(record.toString());
+                    System.out.println(record.toString());
                     NumberOfRecords=NumberOfRecords+1;
                 }
             } else {
