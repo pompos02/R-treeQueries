@@ -18,7 +18,7 @@ public class RStarTree {
     // If insertRecordsFromDataFile parameter is true then makes a new root node since we are resetting the tree and inserting the records from the datafile
     public RStarTree(boolean insertRecordsFromDataFile) {
         this.totalLevels = helper.getTotalLevelsOfTreeIndex(); // Initialise the total levels from the FileHelper class, in case there is an already existing indexFile
-
+        int counter=0;
         if (insertRecordsFromDataFile)
         {
             helper.writeNewIndexFileBlock(new Node(1)); // Initialising the root node
@@ -26,6 +26,7 @@ public class RStarTree {
             for (int i = 1; i< helper.getTotalBlocksInDatafile(); i++)
             {
                 ArrayList<Record> records = helper.readDataFile(i);
+                counter+=records.size();
                 if (records != null)
                 {
                     for (Record record : records) {
@@ -34,7 +35,7 @@ public class RStarTree {
                 }
                 else
                     throw new IllegalStateException("Could not read records properly from the datafile");
-            }
+            }System.out.println("SIZE OF RECORDS: " + counter);
         }
 
     }

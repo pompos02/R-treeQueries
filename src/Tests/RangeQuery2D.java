@@ -23,7 +23,7 @@ public class RangeQuery2D {
 
 
 
-        List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("DONE");
@@ -33,7 +33,9 @@ public class RangeQuery2D {
         System.out.println("creating r*-tree");
         RStarTree rStarTree = new RStarTree(true);
         System.out.println("DONE");
+        System.out.println("total blocks in index file : " + helper.getTotalBlocksInIndexFile());
         ArrayList<Bounds> queryBounds = new ArrayList<>();
+        // 125. 10554576030,Agias Fylaxeos - Mesogeiou,34.7068958,33.0253888
         queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
         queryBounds.add(new Bounds(33.0449947 - 0.67, 33.0449947 + 0.67));
 

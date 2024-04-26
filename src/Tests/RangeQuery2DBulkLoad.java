@@ -12,7 +12,7 @@ public class RangeQuery2DBulkLoad {
 
     public static void main(String[] args) throws IOException {
         // Test initialization
-        List<Record> records = DataFileManagerWithName.loadDataFromFile("map(1).osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("DONE");
@@ -22,6 +22,7 @@ public class RangeQuery2DBulkLoad {
         System.out.println("creating r*-tree");
         BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
         System.out.println("DONE");
+        System.out.println("total blocks in index file : " + helper.getTotalBlocksInIndexFile());
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
         queryBounds.add(new Bounds(33.0449947 - 0.67, 33.0449947 + 0.67));

@@ -56,10 +56,10 @@ public class helper {
             e.printStackTrace();
         }
     }
-    static int getTotalBlocksInIndexFile() {
+    public static int getTotalBlocksInIndexFile() {
         return totalBlocksInIndexFile;
     }
-
+    public static void setTotalBlocksInIndexFile(int newIndex){totalBlocksInIndexFile=newIndex;}
     static int getDataDimensions() {
         return dataDimensions;
     }
@@ -114,7 +114,6 @@ public class helper {
 
 
             updateMetaData(PATH_TO_DATAFILE);
-
             ArrayList<Record> blockRecords = new ArrayList<>();
             int currentBlockSize=0;
             for (Record record : records) {
@@ -124,9 +123,11 @@ public class helper {
                     blockRecords = new ArrayList<>();
                     currentBlockSize = 0;
                 }
+
                 blockRecords.add(record);
                 currentBlockSize+=recordBytes.length;
             }
+            writeDataFileBlock(blockRecords); // fill the leftovers
 
 
         } catch (Exception e) {
@@ -262,12 +263,11 @@ public class helper {
 
     }
 
-    static int getTotalBlocksInDatafile() {
-        ArrayList<Integer> metaData = helper.readMetaData(helper.PATH_TO_DATAFILE);
-        return metaData.get(2)-1;
+    public static int getTotalBlocksInDatafile() {
+        return totalBlocksInDatafile;
     }
 
-    private static void updateLevelsOfTreeInIndexFile()
+    public static void updateLevelsOfTreeInIndexFile()
     {
         try {
             ArrayList<Integer> dataFileMetaData = new ArrayList<>();
