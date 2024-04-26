@@ -1,18 +1,23 @@
 package Tests;
+
 import main.java.spatialtree.*;
 import main.java.spatialtree.Record;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.FileWriter;
 
-public class RangeQuery2D {
+public class KNN {
+
     public static void main(String[] args) throws IOException {
 
-
+        ArrayList<Double> centerPoint = new ArrayList<>(); // ArrayList with the coordinates of an approximate center point
+        centerPoint.add(33.0449947); // Coordinate of second dimension
+        centerPoint.add(34.701862); // Coordinate of first dimension
+        //205. 60170093,Μέσα Γειτονιά,34.701862,33.0449947 for map.osm
         System.out.println("Initializing files:");
-        List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
         helper.CreateDataFile(records,2, true);
         helper.CreateIndexFile(2,false);
         System.out.println("creating R*-tree");
@@ -20,21 +25,22 @@ public class RangeQuery2D {
 
         //QUERY
         ArrayList<Bounds> queryBounds = new ArrayList<>();
-        queryBounds.add(new Bounds(34.7018620-0.1 , 34.7018620+0.1));
-        queryBounds.add(new Bounds(33.0449947 - 0.1, 33.0449947 + 0.1));
-        System.out.print("Starting range query: ");
-        long startRangeQueryTime = System.nanoTime();
-        ArrayList<LeafEntry> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
-        long stopRangeQueryTime = System.nanoTime();
+        queryBounds.add(new Bounds(centerPoint.get(0) , centerPoint.get(0)));
+        queryBounds.add(new Bounds(centerPoint.get(1), centerPoint.get(1)));
+
+        int k=4;
+        System.out.print("Starting KNN query: ");
+        long startKNNTime = System.nanoTime();
+        ArrayList<LeafEntry> queryRecords = rStarTree.getNearestNeighbours(centerPoint, k);
+        long stopKNNTime = System.nanoTime();
         System.out.print("range query Done ");
 
 
 
 
         System.out.println("Entires found in the given region: " + queryRecords.size());
-        System.out.println("Total levels of the tree: " + helper.getTotalLevelsOfTreeIndex());
-        System.out.println("writing them to output2DRangeQuery.csv ");
-        try (FileWriter csvWriter = new FileWriter("output2DRangeQuery.csv")) {
+        System.out.println("writing them to outputKNNQuery.csv ");
+        try (FileWriter csvWriter = new FileWriter("outputKNNQuery.csv")) {
             // Write the CSV header
             csvWriter.append("ID,Name,Latitude,Longitude \n");
 
@@ -49,9 +55,8 @@ public class RangeQuery2D {
         } catch (IOException e) {
             System.err.println("Error writing to CSV file: " + e.getMessage());
         }
-        System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
+        System.out.println("Time taken: " + (double) (stopKNNTime - startKNNTime) / 1_000_000_000.0 + " seconds");
 
 
     }
-
 }

@@ -1,9 +1,11 @@
 package main.java.spatialtree;
 
-import queries.BoundingBoxRangeQuery;
+import queries.*;
 
+import javax.management.Query;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Queue;
 
 public class RStarTree {
 
@@ -40,7 +42,7 @@ public class RStarTree {
 
     }
 
-    Node getRoot() {
+    public Node getRoot() {
         return helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID);
     }
 
@@ -76,9 +78,17 @@ public class RStarTree {
 
     public ArrayList<LeafEntry> getDataInBoundingBox(BoundingBox searchBoundingBox){
         BoundingBoxRangeQuery query = new BoundingBoxRangeQuery(searchBoundingBox);
-        return query.getQueryRecordIds(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
+        return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
     }
 
+    public ArrayList<LeafEntry> getSkyline(BoundingBox searchBoundingBox) {
+        SkylineQuery query = new SkylineQuery(searchBoundingBox);
+        return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
+    }
+    public ArrayList<LeafEntry> getNearestNeighbours(ArrayList<Double> searchPoint, int k){
+        NearestNeighboursQuery query = new NearestNeighboursQuery(searchPoint,k);
+        return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
+    }
     // Inserts nodes recursively. As an optimization, the algorithm steps are
     // in a different order. If this returns a non null Entry, then
     // that Entry should be added to the caller's Node of the R-tree
@@ -303,14 +313,14 @@ public class RStarTree {
         // Attempt to remove the entry
         boolean removed = node.getEntries().removeIf(e -> e instanceof LeafEntry && e.equals(targetEntry));
 
-        System.out.println("IS IT REMOVED? " + removed);
         if (!removed) return false; // Entry was not in the found node
 
         //TODO
         // Handle potential underflow
-        //if (node.getEntries().size() < Node.getMinEntries()) {
+        if (node.getEntries().size() < Node.getMaxEntries() * 0.3) {
+            System.out.println("Underflow");
             //handleUnderflow(node);
-        //}
+        }
 
         // Node is updated, reflect changes in storage if necessary
         helper.updateIndexFileBlock(node, totalLevels);
@@ -330,6 +340,8 @@ public class RStarTree {
         }
         return null;
     }
+
+
 
 
 

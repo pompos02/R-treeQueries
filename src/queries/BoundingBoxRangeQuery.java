@@ -17,7 +17,7 @@ public class BoundingBoxRangeQuery extends Query {
 
     // Returns the ids of the query's records
     @Override
-    public ArrayList<LeafEntry> getQueryRecordIds(Node node){
+    public ArrayList<LeafEntry> getQueryRecords(Node node){
         qualifyingRecord = new ArrayList<>();
         search(node);
         return qualifyingRecord;

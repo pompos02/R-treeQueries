@@ -48,7 +48,7 @@ public class BoundingBox implements Serializable {
     }
 
     // Returns the minimum distance between the bounding box and the point
-    double findMinDistanceFromPoint(ArrayList<Double> point){
+    public double findMinDistanceFromPoint(ArrayList<Double> point){
         double minDistance = 0;
         // For every dimension find the minimum distance
         double rd;

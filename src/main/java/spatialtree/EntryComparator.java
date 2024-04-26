@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 // Class used for comparing Entries based on different criteria
-class EntryComparator {
+public class EntryComparator {
     // Class used to compare entries by their lower or upper bounds
     static class EntryBoundComparator implements Comparator<Entry>
     {
@@ -160,14 +160,14 @@ class EntryComparator {
     }
 
     // Class used to compare entries by their distance from a point
-    static class EntryDistanceFromPointComparator implements Comparator<Entry>
+    public static class EntryDistanceFromPointComparator implements Comparator<Entry>
     {
         // Hash-map  used for mapping the comparison value of the Entries during the compare method
         // Key of the hash-map is the given Entry
         // Value of the hash-map is the given Entry's BoundingBox distance from the given point
         private HashMap<Entry,Double> entryComparisonMap;
 
-        EntryDistanceFromPointComparator(List<Entry> entriesToCompare, ArrayList<Double> point) {
+        public EntryDistanceFromPointComparator(List<Entry> entriesToCompare, ArrayList<Double> point) {
             // Initialising Hash-map
             this.entryComparisonMap = new HashMap<>();
 

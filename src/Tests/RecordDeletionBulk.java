@@ -8,11 +8,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RangeQuery2DBulkLoad {
-
+public class RecordDeletionBulk {
     public static void main(String[] args) throws IOException {
         // Test initialization
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("DONE");
@@ -21,8 +20,24 @@ public class RangeQuery2DBulkLoad {
         System.out.println("DONE");
         System.out.println("creating r*-tree");
         BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
-        System.out.println("DONE");
-        System.out.println("total blocks in index file : " + helper.getTotalBlocksInIndexFile());
+
+        //Query the Entry you want to delete
+        //205. 60170093,Μέσα Γειτονιά,34.701862,33.0449947 for map.osm
+        ArrayList<Bounds> queryBoundsForDeletion = new ArrayList<>();
+        queryBoundsForDeletion.add(new Bounds(34.7018620, 34.7018620));
+        queryBoundsForDeletion.add(new Bounds(33.0449947, 33.0449947));
+        ArrayList<LeafEntry> queryRecordsForDeletion = rStarTree.getDataInBoundingBox(new BoundingBox(queryBoundsForDeletion));
+
+        try{
+            System.out.println("Deleting Record with ID:  " + queryRecordsForDeletion.get(0).getRecordId());
+            LeafEntry EntryForDeletion = queryRecordsForDeletion.get(0);
+            rStarTree.deleteRecord(EntryForDeletion);
+            System.out.println("Deleted ");
+        } catch (Exception e) {
+            throw new IllegalStateException("Entry not found!");
+        }
+
+
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         queryBounds.add(new Bounds(34.7018620-0.1 , 34.7018620+0.1));
         queryBounds.add(new Bounds(33.0449947 - 0.1, 33.0449947 + 0.1));

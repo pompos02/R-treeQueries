@@ -1,6 +1,7 @@
 package main.java.spatialtree;
 
 import queries.BoundingBoxRangeQuery;
+import queries.NearestNeighboursQuery;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,39 +40,35 @@ public class BulkLoadingRStarTree {
 
         }
     }
-    private List<Node> createLeafNodes(ArrayList<Record> records, int dataFileBlockId) {// the dataFileBlockId is not going to be used
+    private List<Node> createLeafNodes(ArrayList<Record> records, int dataFileBlockId) {
         List<Node> nodes = new ArrayList<>();
         ArrayList<Entry> entries = new ArrayList<>();
-        //helper.setTotalBlocksInIndexFile(2);
         for (Record record : records) {
-            // Create bounds for each dimension of the record
             ArrayList<Bounds> recordBounds = new ArrayList<>();
             for (int d = 0; d < helper.getDataDimensions(); d++) {
                 double coordinate = record.getCoordinate(d);
                 recordBounds.add(new Bounds(coordinate, coordinate));
             }
 
+            entries.add(new LeafEntry(record.getId(), dataFileBlockId, recordBounds));
             if (entries.size() == Node.getMaxEntries()) {
                 Node node = new Node(LEAF_LEVEL, new ArrayList<>(entries));
-
-                node.setBlockId(helper.getTotalBlocksInIndexFile());  // Assuming this method returns the next available block ID
+                node.setBlockId(helper.getTotalBlocksInIndexFile());
                 helper.writeNewIndexFileBlock(node);
                 nodes.add(node);
-                entries.clear();
+                entries.clear();  // Clearing the list to free up memory
             }
-            entries.add(new LeafEntry(record.getId(), dataFileBlockId, recordBounds));
-
         }
 
         if (!entries.isEmpty()) {
             Node node = new Node(LEAF_LEVEL, entries);
-            node.setBlockId(helper.getTotalBlocksInIndexFile());    // Ensure new nodes get a unique block ID
+            node.setBlockId(helper.getTotalBlocksInIndexFile());
             helper.writeNewIndexFileBlock(node);
             nodes.add(node);
-
         }
         return nodes;
     }
+
     private Node bulkLoadTree(List<Node> leafNodes) {
         int currentLevel = LEAF_LEVEL;
         List<Node> currentLevelNodes = new ArrayList<>(leafNodes);
@@ -139,11 +136,53 @@ public class BulkLoadingRStarTree {
 
     public ArrayList<LeafEntry> getDataInBoundingBox(BoundingBox searchBoundingBox){
         BoundingBoxRangeQuery query = new BoundingBoxRangeQuery(searchBoundingBox);
-        return query.getQueryRecordIds(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
+        return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
     }
 
 
     public int getTotalLevels() {
         return totalLevels;
+    }
+
+    public boolean deleteRecord(Entry targetEntry) {
+        Node node = findLeafNode(targetEntry, getRoot());
+        if (node == null){
+            return false; // Entry not found
+        }
+
+        // Attempt to remove the entry
+        boolean removed = node.getEntries().removeIf(e -> e instanceof LeafEntry && e.equals(targetEntry));
+
+        if (!removed) return false; // Entry was not in the found node
+
+        //TODO
+        // Handle potential underflow
+        if (node.getEntries().size() < Node.getMaxEntries() * 0.3) {
+            System.out.println("Underflow");
+            //handleUnderflow(node);
+        }
+
+        // Node is updated, reflect changes in storage if necessary
+        helper.updateIndexFileBlock(node, totalLevels);
+        return true; // Entry successfully deleted
+    }
+
+    private Node findLeafNode(Entry targetEntry, Node node) {
+        if (node.getLevel() == LEAF_LEVEL) {
+            return node.contains(targetEntry) ? node : null;
+        } else {
+            for (Entry e : node.getEntries()) {
+                if (BoundingBox.checkOverlap(e.getBoundingBox(), targetEntry.getBoundingBox())) {
+                    Node result = findLeafNode(targetEntry, helper.readIndexFileBlock(e.getChildNodeBlockId()));
+                    if (result != null) return result;
+                }
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<LeafEntry> getNearestNeighbours(ArrayList<Double> searchPoint, int k){
+        NearestNeighboursQuery query = new NearestNeighboursQuery(searchPoint,k);
+        return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
     }
 }

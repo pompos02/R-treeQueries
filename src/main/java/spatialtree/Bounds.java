@@ -20,7 +20,7 @@ public class Bounds implements Serializable {
             throw new IllegalArgumentException( "The lower value of the bounds cannot be bigger than the upper");
     }
 
-    double getLower() {
+    public double getLower() {
         return lower;
     }
 
