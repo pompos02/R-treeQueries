@@ -1,17 +1,28 @@
-package queries;
-
+package Tests;
 import main.java.spatialtree.*;
 import main.java.spatialtree.Record;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.FileWriter;
 
-public class BulkTest {
-
+public class RangeQuery2D {
     public static void main(String[] args) throws IOException {
-        // Test initialization
+
+        // ------------------------------------------------------------------------
+        // Range Query Data
+        ArrayList<Double> rStarRangeQueryTimes = new ArrayList<>();
+        ArrayList<Double> seqScanRangeQueryTimes = new ArrayList<>();
+        ArrayList<Double> areaOfRectangles = new ArrayList<>();
+        ArrayList<Integer> rangeQueryRecords = new ArrayList<>();
+
+        // ------------------------------------------------------------------------
+
+
+
+
+
         List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
@@ -20,7 +31,7 @@ public class BulkTest {
         helper.CreateIndexFile(2,false);
         System.out.println("DONE");
         System.out.println("creating r*-tree");
-        BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
+        RStarTree rStarTree = new RStarTree(true);
         System.out.println("DONE");
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
@@ -43,7 +54,7 @@ public class BulkTest {
             for (LeafEntry leafRecord : queryRecords) {
                 counter++;
                 // Assuming findRecord() returns a comma-separated string "id,name,lat,lon"
-                csvWriter.append(counter + ". " + leafRecord.findRecordWithoutBlockId().toString());
+                csvWriter.append(counter + ". " + leafRecord.findRecord().toString());
                 csvWriter.append("\n");  // New line after each record
             }
         } catch (IOException e) {
@@ -54,4 +65,5 @@ public class BulkTest {
 
 
     }
+
 }
