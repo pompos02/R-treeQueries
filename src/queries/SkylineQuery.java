@@ -6,6 +6,9 @@ import main.java.spatialtree.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+// A very Simple SkyLineQuery just to prove the logic
+
 public class SkylineQuery extends Query {
     private BoundingBox searchBoundingBox; // BoundingBox for the region to consider in the skyline
 
@@ -55,11 +58,21 @@ public class SkylineQuery extends Query {
     }
 
     private boolean dominates(LeafEntry a, LeafEntry b) {
-        // Check if 'a' dominates 'b'. For simplicity, assuming two dimensions: cost and distance
-        boolean betterInAll = a.getBoundingBoxArray().get(0).getLower() <= b.getBoundingBoxArray().get(0).getLower() &&
-                a.getBoundingBoxArray().get(1).getLower() <= b.getBoundingBoxArray().get(1).getLower();
-        boolean betterInAtLeastOne = a.getBoundingBoxArray().get(0).getLower() < b.getBoundingBoxArray().get(0).getLower() ||
-                a.getBoundingBoxArray().get(1).getLower() < b.getBoundingBoxArray().get(1).getLower();
-        return betterInAll && betterInAtLeastOne;
+        ArrayList<Bounds> boundsA = a.getBoundingBoxArray();
+        ArrayList<Bounds> boundsB = b.getBoundingBoxArray();
+
+        boolean betterInAll = true; // 'a' must be better or equal in all dimensions to dominate 'b'
+        boolean betterInAtLeastOne = false; // 'a' must be strictly better in at least one dimension to dominate 'b'
+
+        for (int d = 0; d < boundsA.size(); d++) {
+            if (boundsA.get(d).getLower() > boundsB.get(d).getLower()) {
+                betterInAll = false; // Found a dimension where 'a' is not better or equal to 'b'
+            }
+            if (boundsA.get(d).getLower() < boundsB.get(d).getLower()) {
+                betterInAtLeastOne = true; // Found a dimension where 'a' is strictly better than 'b'
+            }
+        }
+
+        return betterInAll && betterInAtLeastOne; // 'a' dominates 'b' if it is better in at least one dimension and not worse in any
     }
 }

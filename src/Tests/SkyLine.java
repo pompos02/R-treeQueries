@@ -18,7 +18,7 @@ public class SkyLine {
         helper.CreateDataFile(records,2, true);
         helper.CreateIndexFile(2,false);
         System.out.println("creating R*-tree");
-        RStarTree rStarTree = new RStarTree(true);
+        BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
 
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         queryBounds.add(new Bounds(34.7018620-0.1 , 34.7018620+0.1));
@@ -41,7 +41,7 @@ public class SkyLine {
             for (LeafEntry leafRecord : queryRecords) {
                 counter++;
                 // Assuming findRecord() returns a comma-separated string "id,name,lat,lon"
-                csvWriter.append(counter + ". " + leafRecord.findRecord().toString());
+                csvWriter.append(counter + ". " + leafRecord.findRecordWithoutBlockId().toString());
                 csvWriter.append("\n");  // New line after each record
             }
         } catch (IOException e) {

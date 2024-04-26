@@ -12,7 +12,7 @@ public class RangeQuery2D {
 
 
         System.out.println("Initializing files:");
-        List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
         helper.CreateDataFile(records,2, true);
         helper.CreateIndexFile(2,false);
         System.out.println("creating R*-tree");
@@ -20,8 +20,12 @@ public class RangeQuery2D {
 
         //QUERY
         ArrayList<Bounds> queryBounds = new ArrayList<>();
-        queryBounds.add(new Bounds(34.7018620-0.1 , 34.7018620+0.1));
-        queryBounds.add(new Bounds(33.0449947 - 0.1, 33.0449947 + 0.1));
+        // 7111836589,,31.72438,28.42733
+        //all of malta: 14.2932,14.6000,    36.0224,35.7700
+        //center 14.4343,14.4511,35.8779,35.8922
+        double off=0.1;
+        queryBounds.add(new Bounds(35.9-off , 35.9+off));
+        queryBounds.add(new Bounds(14.4-off , 14.4+off));
         System.out.print("Starting range query: ");
         long startRangeQueryTime = System.nanoTime();
         ArrayList<LeafEntry> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));

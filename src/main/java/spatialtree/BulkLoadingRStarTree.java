@@ -2,6 +2,7 @@ package main.java.spatialtree;
 
 import queries.BoundingBoxRangeQuery;
 import queries.NearestNeighboursQuery;
+import queries.SkylineQuery;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,7 +80,6 @@ public class BulkLoadingRStarTree {
                 helper.writeNewIndexFileBlock(node);
             }
             currentLevel++;
-            System.out.println(currentLevel);
             currentLevelNodes = nextLevelNodes;
         }
 
@@ -96,7 +96,6 @@ public class BulkLoadingRStarTree {
             Entry entry = new Entry(bb , node.getBlockId());  // Create a new Entry for the node
             if (entries.size() == Node.getMaxEntries()) {
                 helper.updateLevelsOfTreeInIndexFile();
-                System.out.println("hLOELFOFORS" + helper.getTotalLevelsOfTreeIndex());
                 Node newNode = new Node(helper.getTotalLevelsOfTreeIndex(), new ArrayList<>(entries));
 
                 newNode.setBlockId(helper.getTotalBlocksInIndexFile());  // Get a new block ID for the node
@@ -183,6 +182,11 @@ public class BulkLoadingRStarTree {
 
     public ArrayList<LeafEntry> getNearestNeighbours(ArrayList<Double> searchPoint, int k){
         NearestNeighboursQuery query = new NearestNeighboursQuery(searchPoint,k);
+        return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
+    }
+
+    public ArrayList<LeafEntry> getSkyline(BoundingBox searchBoundingBox) {
+        SkylineQuery query = new SkylineQuery(searchBoundingBox);
         return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
     }
 }

@@ -25,7 +25,7 @@ public class BoundingBox implements Serializable {
         return bounds;
     }
 
-    double getArea() {
+    public double getArea() {
         // If area is not yet initialized, find the area
         if (area == null)
             area = calculateArea();
@@ -33,7 +33,7 @@ public class BoundingBox implements Serializable {
         return area;
     }
 
-    double getMargin() {
+    public double getMargin() {
         // If margin is not yet initialized, find the margin
         if (margin == null)
             margin = calculateMargin();
