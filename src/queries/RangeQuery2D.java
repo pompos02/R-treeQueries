@@ -23,7 +23,7 @@ public class RangeQuery2D {
 
 
 
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("DONE");
@@ -33,8 +33,6 @@ public class RangeQuery2D {
         System.out.println("creating r*-tree");
         RStarTree rStarTree = new RStarTree(true);
         System.out.println("DONE");
-        System.out.println("TOTAL LEVELS: " + helper.getTotalLevelsOfTreeIndex());
-        //lat="34.7018620" lon="33.0449947
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
         queryBounds.add(new Bounds(33.0449947 - 0.67, 33.0449947 + 0.67));

@@ -73,7 +73,7 @@ import java.util.Collections;
 
         // Initialize combinedBounds with extreme values to be reduced in the loops
         for (int i = 0; i < dimensions; i++) {
-            combinedBounds.set(i, new Bounds(Double.MAX_VALUE, -Double.MAX_VALUE));
+            combinedBounds.set(i, new Bounds(-Double.MAX_VALUE, Double.MAX_VALUE));
         }
 
         // Calculate minimum and maximum for each dimension across all entries

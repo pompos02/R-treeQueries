@@ -39,6 +39,34 @@ public class LeafEntry extends Entry {
         return null;
 
     }
+
+    public Record findRecordWithoutBlockId(){
+        ArrayList<Record> records = new ArrayList<>();
+        for (int blockId = 1; blockId <= helper.getTotalBlocksInDatafile(); blockId++) {
+            records=helper.readDataFile(blockId);
+            for (Record record : records) {
+                if(record.getId() == this.recordId ){
+                    return record;
+                }
+            }
+        }
+
+
+
+
+        if (records != null && !records.isEmpty()) {
+
+            for (Record record : records) {
+                if(record.getId() == this.recordId ){
+                    return record;
+                }
+            }
+        } else {
+            System.out.println("No records found in Block " + this.getDataFileBlockId() + ".");
+        }
+        return null;
+
+    }
     @Override
     public boolean isLeaf() {
         return true; // This is a leaf node

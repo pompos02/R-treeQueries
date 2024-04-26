@@ -1,51 +1,57 @@
 package queries;
 
-import main.java.spatialtree.BoundingBox;
-import main.java.spatialtree.Bounds;
-import main.java.spatialtree.BulkLoadingRStarTree;
-import main.java.spatialtree.LeafEntry;
+import main.java.spatialtree.*;
+import main.java.spatialtree.Record;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class BulkTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Test initialization
-        System.out.println("Starting the test...");
+        List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
+        System.out.println("creating datafile: ");
+        helper.CreateDataFile(records,2, true);
+        System.out.println("DONE");
+        System.out.println("creating index file: ");
+        helper.CreateIndexFile(2,false);
+        System.out.println("DONE");
+        System.out.println("creating r*-tree");
+        BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
+        System.out.println("DONE");
+        ArrayList<Bounds> queryBounds = new ArrayList<>();
+        queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
+        queryBounds.add(new Bounds(33.0449947 - 0.67, 33.0449947 + 0.67));
 
-        // Initialize the tree with the flag to simulate loading from a data file
-        BulkLoadingRStarTree tree = new BulkLoadingRStarTree(true);
 
-        // Test if the tree root is correctly initialized
-        if (tree.getRoot() != null) {
-            System.out.println("Test passed: Root is initialized.");
-        } else {
-            System.out.println("Test failed: Root is not initialized.");
+        System.out.print("Starting range query: ");
+        long startRangeQueryTime = System.nanoTime();
+        ArrayList<LeafEntry> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
+        long stopRangeQueryTime = System.nanoTime();
+        System.out.print("range query Done ");
+        System.out.println("Entires found in the given region: " + queryRecords.size());
+        System.out.println("writing them to output2DRangeQuery.csv ");
+        try (FileWriter csvWriter = new FileWriter("output2DRangeQuery.csv")) {
+            // Write the CSV header
+            csvWriter.append("ID,Name,Latitude,Longitude \n");
+
+            // Loop through records and write each to the file
+            int counter=0;
+            for (LeafEntry leafRecord : queryRecords) {
+                counter++;
+                // Assuming findRecord() returns a comma-separated string "id,name,lat,lon"
+                csvWriter.append(counter + ". " + leafRecord.findRecordWithoutBlockId().toString());
+                csvWriter.append("\n");  // New line after each record
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to CSV file: " + e.getMessage());
         }
+        System.out.println(queryRecords.size());
+        System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
 
-        // Test the number of levels in the tree
-        // Assuming we know the expected number of levels after bulk loading the given data
-        int expectedLevels = 3; // This value should be set based on expected test data
-        if (tree.getTotalLevels() == expectedLevels) {
-            System.out.println("Test passed: Correct number of levels in the tree.");
-        } else {
-            System.out.println("Test failed: Incorrect number of levels. Expected: " + expectedLevels + ", but was: " + tree.getTotalLevels());
-        }
 
-        // Perform a simple range query test
-
-        ArrayList<Bounds> searchBoundingBox = new ArrayList<>();
-        searchBoundingBox.add(new Bounds(0, 1));
-        searchBoundingBox.add(new Bounds(0, 1));
-        ArrayList<LeafEntry> foundEntries = tree.getDataInBoundingBox(new BoundingBox(searchBoundingBox));
-        // Check if the correct number of entries is found
-        int expectedEntriesCount = 2; // This should match the expected result from the test data
-        if (foundEntries.size() == expectedEntriesCount) {
-            System.out.println("Test passed: Correct number of entries found in bounding box.");
-        } else {
-            System.out.println("Test failed: Incorrect number of entries found. Expected: " + expectedEntriesCount + ", but was: " + foundEntries.size());
-        }
-
-        System.out.println("Test completed.");
     }
 }

@@ -37,6 +37,7 @@ public class BulkLoadingRStarTree {
                 helper.updateIndexFileBlock(node,LEAF_LEVEL);
             }
             Node root = bulkLoadTree(nodes);  // Build the entire tree
+            root.setBlockId(ROOT_NODE_BLOCK_ID);
             helper.updateIndexFileBlock(root, ++totalLevels);  // Store the root node
 
         }
