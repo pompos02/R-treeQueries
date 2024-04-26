@@ -12,7 +12,7 @@ public class RangeQuery2DBulkLoad {
 
     public static void main(String[] args) throws IOException {
         // Test initialization
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("DONE");

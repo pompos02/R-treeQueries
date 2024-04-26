@@ -71,4 +71,13 @@ public class LeafEntry extends Entry {
     public boolean isLeaf() {
         return true; // This is a leaf node
     }
+
+
+    // Fuction to compare Leaf Entries
+    public boolean equals(Object obj) {
+        if ((obj instanceof LeafEntry && this.recordId == ((LeafEntry) obj).getRecordId())) {
+            return true;
+        }
+        return false;
+    }
 }

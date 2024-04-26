@@ -198,6 +198,13 @@ import java.util.Collections;
         return splitNodes;
     }
 
-
+    public boolean contains(Entry targetEntry) {
+        for (Entry entry : entries) {
+            if (BoundingBox.checkOverlap(entry.getBoundingBox(), targetEntry.getBoundingBox())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

@@ -293,4 +293,44 @@ public class RStarTree {
         for (Entry entry : removedEntries)
             insert(null,null,entry,childNode.getLevel());
     }
+
+    public boolean deleteRecord(Entry targetEntry) {
+        Node node = findLeafNode(targetEntry, getRoot());
+        if (node == null){
+            return false; // Entry not found
+        }
+
+        // Attempt to remove the entry
+        boolean removed = node.getEntries().removeIf(e -> e instanceof LeafEntry && e.equals(targetEntry));
+
+        System.out.println("IS IT REMOVED? " + removed);
+        if (!removed) return false; // Entry was not in the found node
+
+        //TODO
+        // Handle potential underflow
+        //if (node.getEntries().size() < Node.getMinEntries()) {
+            //handleUnderflow(node);
+        //}
+
+        // Node is updated, reflect changes in storage if necessary
+        helper.updateIndexFileBlock(node, totalLevels);
+        return true; // Entry successfully deleted
+    }
+
+    private Node findLeafNode(Entry targetEntry, Node node) {
+        if (node.getLevel() == LEAF_LEVEL) {
+            return node.contains(targetEntry) ? node : null;
+        } else {
+            for (Entry e : node.getEntries()) {
+                if (BoundingBox.checkOverlap(e.getBoundingBox(), targetEntry.getBoundingBox())) {
+                    Node result = findLeafNode(targetEntry, helper.readIndexFileBlock(e.getChildNodeBlockId()));
+                    if (result != null) return result;
+                }
+            }
+        }
+        return null;
+    }
+
+
+
 }

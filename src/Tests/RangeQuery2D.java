@@ -23,7 +23,7 @@ public class RangeQuery2D {
 
 
 
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("DONE");
@@ -34,17 +34,37 @@ public class RangeQuery2D {
         RStarTree rStarTree = new RStarTree(true);
         System.out.println("DONE");
         System.out.println("total blocks in index file : " + helper.getTotalBlocksInIndexFile());
-        ArrayList<Bounds> queryBounds = new ArrayList<>();
+
+
+
+        ArrayList<Bounds> queryBoundsForDeletion = new ArrayList<>();
         // 125. 10554576030,Agias Fylaxeos - Mesogeiou,34.7068958,33.0253888
-        queryBounds.add(new Bounds(34.7018620-0.01 , 34.7018620+0.01));
-        queryBounds.add(new Bounds(33.0449947 - 0.01, 33.0449947 + 0.01));
+        queryBoundsForDeletion.add(new Bounds(34.7018620-0.00001 , 34.7018620+0.00001));
+        queryBoundsForDeletion.add(new Bounds(33.0449947 - 0.00001, 33.0449947 + 0.00001));
+        ArrayList<LeafEntry> queryRecordsForDeletion = rStarTree.getDataInBoundingBox(new BoundingBox(queryBoundsForDeletion));
 
 
+
+
+        System.out.println("Deleting Record with ID:  " + queryRecordsForDeletion.get(0).getRecordId());
+        LeafEntry EntryForDeletion = queryRecordsForDeletion.get(0);
+        rStarTree.deleteRecord(EntryForDeletion);
+        System.out.println("Deleted ");
+
+
+
+        ArrayList<Bounds> queryBounds = new ArrayList<>();
+        queryBounds.add(new Bounds(34.7018620-0.1 , 34.7018620+0.1));
+        queryBounds.add(new Bounds(33.0449947 - 0.1, 33.0449947 + 0.1));
         System.out.print("Starting range query: ");
         long startRangeQueryTime = System.nanoTime();
         ArrayList<LeafEntry> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
         long stopRangeQueryTime = System.nanoTime();
         System.out.print("range query Done ");
+
+
+
+
         System.out.println("Entires found in the given region: " + queryRecords.size());
         System.out.println("Total levels of the tree: " + helper.getTotalLevelsOfTreeIndex());
         System.out.println("writing them to output2DRangeQuery.csv ");

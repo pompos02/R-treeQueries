@@ -2,6 +2,7 @@ package main.java.spatialtree;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Objects;
 
 // An Entry refers to the address of a lower Node (child) in the RStarTree and to it's BoundingBox (it's covering rectangle),
 // which covers all the bounding boxes in the lower Node's Entries
@@ -57,4 +58,12 @@ public class Entry implements Serializable {
     public boolean isLeaf() {
         return false; // Default implementation for non-leaf nodes
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof LeafEntry)) return false;
+        return false;
+    }
+
 }
