@@ -34,9 +34,7 @@ public class BulkLoadingRStarTree {
             List<Node> nodes= createLeafNodes(allRecords,-1);
             Node root = bulkLoadTree(nodes);  // Build the entire tree
             root.setBlockId(helper.getTotalBlocksInIndexFile());
-            System.out.println("Writing Node at Block ID: " + root.getBlockId());
             helper.writeNewIndexFileBlock(root);
-            System.out.println("New Total Blocks: " + helper.getTotalBlocksInIndexFile());  // Store the root node
             ROOT_NODE_BLOCK_ID=helper.getTotalBlocksInIndexFile()-1; // -1 because we incremented it in writeNewIndexFileBlock
 
         }
@@ -57,10 +55,7 @@ public class BulkLoadingRStarTree {
                 Node node = new Node(LEAF_LEVEL, new ArrayList<>(entries));
 
                 node.setBlockId(helper.getTotalBlocksInIndexFile());  // Assuming this method returns the next available block ID
-                System.out.println("entries number1: " + entries.size());
-                System.out.println("Writing Node at Block ID: " + node.getBlockId());
                 helper.writeNewIndexFileBlock(node);
-                System.out.println("New Total Blocks: " + helper.getTotalBlocksInIndexFile());  // Write node to index file
                 nodes.add(node);
                 entries.clear();
             }
@@ -71,10 +66,7 @@ public class BulkLoadingRStarTree {
         if (!entries.isEmpty()) {
             Node node = new Node(LEAF_LEVEL, entries);
             node.setBlockId(helper.getTotalBlocksInIndexFile());    // Ensure new nodes get a unique block ID
-            System.out.println("entries number2 (if) : " + entries.size());
-            System.out.println("Writing Node at Block ID: " + node.getBlockId());
             helper.writeNewIndexFileBlock(node);
-            System.out.println("New Total Blocks: " + helper.getTotalBlocksInIndexFile());     // Persist the node
             nodes.add(node);
 
         }
@@ -87,11 +79,10 @@ public class BulkLoadingRStarTree {
             List<Node> nextLevelNodes = constructHigherLevelNodes(currentLevelNodes, currentLevel);
             for (Node node : nextLevelNodes) {
                 node.setBlockId(helper.getTotalBlocksInIndexFile());
-                System.out.println("Writing Node at Block ID: " + node.getBlockId());
                 helper.writeNewIndexFileBlock(node);
-                System.out.println("New Total Blocks: " + helper.getTotalBlocksInIndexFile());  // Update the index file with the new node
             }
             currentLevel++;
+            System.out.println(currentLevel);
             currentLevelNodes = nextLevelNodes;
         }
 
@@ -108,13 +99,12 @@ public class BulkLoadingRStarTree {
             Entry entry = new Entry(bb , node.getBlockId());  // Create a new Entry for the node
             if (entries.size() == Node.getMaxEntries()) {
                 helper.updateLevelsOfTreeInIndexFile();
+                System.out.println("hLOELFOFORS" + helper.getTotalLevelsOfTreeIndex());
                 Node newNode = new Node(helper.getTotalLevelsOfTreeIndex(), new ArrayList<>(entries));
 
                 newNode.setBlockId(helper.getTotalBlocksInIndexFile());  // Get a new block ID for the node
 
-                System.out.println("Writing Node at Block ID: " + node.getBlockId());
                 helper.writeNewIndexFileBlock(newNode);
-                System.out.println("New Total Blocks: " + helper.getTotalBlocksInIndexFile()); // Persist the new node to the index file
                 higherLevelNodes.add(newNode);
                 entries.clear();
             }

@@ -36,8 +36,8 @@ public class RangeQuery2D {
         System.out.println("total blocks in index file : " + helper.getTotalBlocksInIndexFile());
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         // 125. 10554576030,Agias Fylaxeos - Mesogeiou,34.7068958,33.0253888
-        queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
-        queryBounds.add(new Bounds(33.0449947 - 0.67, 33.0449947 + 0.67));
+        queryBounds.add(new Bounds(34.7018620-0.01 , 34.7018620+0.01));
+        queryBounds.add(new Bounds(33.0449947 - 0.01, 33.0449947 + 0.01));
 
 
         System.out.print("Starting range query: ");
@@ -46,6 +46,7 @@ public class RangeQuery2D {
         long stopRangeQueryTime = System.nanoTime();
         System.out.print("range query Done ");
         System.out.println("Entires found in the given region: " + queryRecords.size());
+        System.out.println("Total levels of the tree: " + helper.getTotalLevelsOfTreeIndex());
         System.out.println("writing them to output2DRangeQuery.csv ");
         try (FileWriter csvWriter = new FileWriter("output2DRangeQuery.csv")) {
             // Write the CSV header
@@ -62,7 +63,6 @@ public class RangeQuery2D {
         } catch (IOException e) {
             System.err.println("Error writing to CSV file: " + e.getMessage());
         }
-        System.out.println(queryRecords.size());
         System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
 
 

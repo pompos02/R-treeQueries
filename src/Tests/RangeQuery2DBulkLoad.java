@@ -24,8 +24,8 @@ public class RangeQuery2DBulkLoad {
         System.out.println("DONE");
         System.out.println("total blocks in index file : " + helper.getTotalBlocksInIndexFile());
         ArrayList<Bounds> queryBounds = new ArrayList<>();
-        queryBounds.add(new Bounds(34.7018620-0.5 , 34.7018620+0.5));
-        queryBounds.add(new Bounds(33.0449947 - 0.67, 33.0449947 + 0.67));
+        queryBounds.add(new Bounds(34.7018620-0.01 , 34.7018620+0.01));
+        queryBounds.add(new Bounds(33.0449947 - 0.01, 33.0449947 + 0.01));
 
 
         System.out.print("Starting range query: ");
@@ -34,7 +34,9 @@ public class RangeQuery2DBulkLoad {
         long stopRangeQueryTime = System.nanoTime();
         System.out.print("range query Done ");
         System.out.println("Entires found in the given region: " + queryRecords.size());
+        System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
         System.out.println("writing them to output2DRangeQuery.csv ");
+        System.out.println("Total levels of the tree: " + helper.getTotalLevelsOfTreeIndex());
         try (FileWriter csvWriter = new FileWriter("output2DRangeQueryBulkLoaded.csv")) {
             // Write the CSV header
             csvWriter.append("ID,Name,Latitude,Longitude \n");
@@ -50,7 +52,6 @@ public class RangeQuery2DBulkLoad {
         } catch (IOException e) {
             System.err.println("Error writing to CSV file: " + e.getMessage());
         }
-        System.out.println(queryRecords.size());
         System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
 
 
