@@ -15,7 +15,7 @@ public class SequentialScanBoundingBoxRangeQuery extends SequentialScanQuery{
 
     // Returns the ids of the query's records
     @Override
-    public ArrayList<LeafEntry> getQueryRecordIds() {
+    public ArrayList<LeafEntry> getQueryRecords() {
         qualifyingRecordIds = new ArrayList<>();
         search();
         return qualifyingRecordIds;

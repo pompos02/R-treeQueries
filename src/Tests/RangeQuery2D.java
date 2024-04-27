@@ -15,7 +15,7 @@ public class RangeQuery2D {
     static RStarTree rStarTreeMaker(boolean reconstruct) throws IOException {
         if(reconstruct){
             System.out.println("Initializing files:");
-            List<Record> records = DataFileManagerWithName.loadDataFromFile("map.osm");
+            List<Record> records = DataFileManagerWithName.loadDataFromFile("malta.osm");
             helper.CreateDataFile(records,2, true);
             helper.CreateIndexFile(2,true);
             System.out.println("creating R*-tree");
@@ -33,7 +33,7 @@ public class RangeQuery2D {
     }
     public static void main(String[] args) throws IOException {
 
-        boolean reconstruct = true;
+        boolean reconstruct = false;
 
         RStarTree rStarTree= rStarTreeMaker(reconstruct);
 
@@ -43,16 +43,19 @@ public class RangeQuery2D {
         // 7111836589,,31.72438,28.42733
         //all of malta: 14.2932,14.6000,    36.0224,35.7700
         //center 14.4343,14.4511,35.8779,35.8922
-        double off=0.1;
+        double off=0.01;
         queryBounds.add(new Bounds(35.9-off , 35.9+off));
         queryBounds.add(new Bounds(14.4-off , 14.4+off));
         //queryBounds.add(new Bounds(34.7018620-off , 34.7018620+off));
         //queryBounds.add(new Bounds(33.0449947-off , 33.0449947+off));
+
+
+
         System.out.println("Starting R*-Tree range query: ");
         long startRangeQueryTime = System.nanoTime();
         ArrayList<LeafEntry> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
         long stopRangeQueryTime = System.nanoTime();
-        System.out.println("Entire found in the given region: " + queryRecords.size());
+        System.out.println("Records found in the given region: " + queryRecords.size());
         System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
 
 
@@ -62,7 +65,7 @@ public class RangeQuery2D {
         System.out.println("Starting RangeQuery With Sequential scan : ");
         SequentialScanBoundingBoxRangeQuery sequentialScanBoundingBoxRangeQuery = new SequentialScanBoundingBoxRangeQuery(new BoundingBox(queryBounds));
         long startSequentialRangeQueryTime = System.nanoTime();
-        ArrayList<LeafEntry> SequentialQueryRecords=sequentialScanBoundingBoxRangeQuery.getQueryRecordIds();
+        ArrayList<LeafEntry> SequentialQueryRecords=sequentialScanBoundingBoxRangeQuery.getQueryRecords();
         long stopSequentialRangeQueryTime = System.nanoTime();
         System.out.println("Records found in the given region: " + SequentialQueryRecords.size());
         System.out.println("Time taken Sequential scan:  " + (double) (stopSequentialRangeQueryTime - startSequentialRangeQueryTime) / 1_000_000_000.0 + " seconds");

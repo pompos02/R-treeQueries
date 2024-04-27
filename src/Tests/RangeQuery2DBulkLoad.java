@@ -17,7 +17,7 @@ public class RangeQuery2DBulkLoad {
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("creating index file: ");
-        helper.CreateIndexFile(2,false);
+        helper.CreateIndexFile(2,true);
         System.out.println("creating R*-Tree");
         BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
         ArrayList<Bounds> queryBounds = new ArrayList<>();
@@ -42,7 +42,7 @@ public class RangeQuery2DBulkLoad {
         System.out.println("Starting RangeQuery With Sequential scan : ");
         SequentialScanBoundingBoxRangeQuery sequentialScanBoundingBoxRangeQuery = new SequentialScanBoundingBoxRangeQuery(new BoundingBox(queryBounds));
         long startSequentialRangeQueryTime = System.nanoTime();
-        ArrayList<LeafEntry> SequentialQueryRecords=sequentialScanBoundingBoxRangeQuery.getQueryRecordIds();
+        ArrayList<LeafEntry> SequentialQueryRecords=sequentialScanBoundingBoxRangeQuery.getQueryRecords();
         long stopSequentialRangeQueryTime = System.nanoTime();
         System.out.println("Records found in the given region: " + SequentialQueryRecords.size());
         System.out.println("Time taken Sequential scan:  " + (double) (stopSequentialRangeQueryTime - startSequentialRangeQueryTime) / 1_000_000_000.0 + " seconds");

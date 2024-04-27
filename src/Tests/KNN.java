@@ -1,5 +1,7 @@
 package Tests;
 
+import SequentialQueries.SequentialNearestNeighboursQuery;
+import SequentialQueries.SequentialScanBoundingBoxRangeQuery;
 import main.java.spatialtree.Record;
 import main.java.spatialtree.*;
 
@@ -9,19 +11,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KNN {
-
+    static RStarTree rStarTreeMaker(boolean reconstruct) throws IOException {
+        if(reconstruct){
+            System.out.println("Initializing files:");
+            List<Record> records = DataFileManagerWithName.loadDataFromFile("malta.osm");
+            helper.CreateDataFile(records,2, true);
+            helper.CreateIndexFile(2,true);
+            System.out.println("creating R*-tree");
+            RStarTree rStarTree = new RStarTree(true);
+            return rStarTree;
+        }
+        else{
+            List<Record> EmptyRecords = new ArrayList<>();
+            helper.CreateDataFile(EmptyRecords,2, false);
+            helper.CreateIndexFile(2,false);
+            System.out.println("creating R*-tree");
+            RStarTree rStarTree = new RStarTree(false);
+            return rStarTree;
+        }
+    }
     public static void main(String[] args) throws IOException {
 
         ArrayList<Double> centerPoint = new ArrayList<>(); // ArrayList with the coordinates of an approximate center point
-        centerPoint.add(33.0449947); // Coordinate of second dimension
-        centerPoint.add(34.701862); // Coordinate of first dimension
-        //205. 60170093,Μέσα Γειτονιά,34.701862,33.0449947 for map.osm
-        System.out.println("Initializing files:");
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
-        helper.CreateDataFile(records,2, true);
-        helper.CreateIndexFile(2,false);
-        System.out.println("creating R*-tree");
-        RStarTree rStarTree = new RStarTree(true);
+        centerPoint.add(14.4); // Coordinate of second dimension
+        centerPoint.add(35.9); // Coordinate of first dimension
+
+        boolean reconstruct = false;
+
+        RStarTree rStarTree= rStarTreeMaker(reconstruct);
+
 
         //QUERY
         ArrayList<Bounds> queryBounds = new ArrayList<>();
@@ -29,14 +47,23 @@ public class KNN {
         queryBounds.add(new Bounds(centerPoint.get(1), centerPoint.get(1)));
 
         int k=4;
-        System.out.print("Starting KNN query: ");
+        System.out.print("Starting R*-Tree K-NN query: ");
         long startKNNTime = System.nanoTime();
         ArrayList<LeafEntry> queryRecords = rStarTree.getNearestNeighbours(centerPoint, k);
         long stopKNNTime = System.nanoTime();
-        System.out.print("range query Done ");
+        System.out.println("Records found in the given region: " + queryRecords.size());
+        System.out.println("Time taken: " + (double) (stopKNNTime - startKNNTime) / 1_000_000_000.0 + " seconds");
 
+        System.out.println("---------------------------------------------------------------");
 
-
+        // Sequential Scan - Range Query
+        System.out.println("Starting K-NN With Sequential scan : ");
+        SequentialNearestNeighboursQuery sequentialScanNearestNeighboursQuery = new SequentialNearestNeighboursQuery(centerPoint,k);
+        long startSequentialRangeQueryTime = System.nanoTime();
+        ArrayList<LeafEntry> SequentialQueryRecords=sequentialScanNearestNeighboursQuery.getQueryRecords();
+        long stopSequentialRangeQueryTime = System.nanoTime();
+        System.out.println("Records found in the given region: " + SequentialQueryRecords.size());
+        System.out.println("Time taken Sequential scan:  " + (double) (stopSequentialRangeQueryTime - startSequentialRangeQueryTime) / 1_000_000_000.0 + " seconds");
 
         System.out.println("Entires found in the given region: " + queryRecords.size());
         System.out.println("writing them to outputKNNQuery.csv ");
