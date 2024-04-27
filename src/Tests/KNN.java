@@ -67,22 +67,25 @@ public class KNN {
 
         System.out.println("Entires found in the given region: " + queryRecords.size());
         System.out.println("writing them to outputKNNQuery.csv ");
-        try (FileWriter csvWriter = new FileWriter("outputKNNQuery.csv")) {
-            // Write the CSV header
-            csvWriter.append("ID,Name,Latitude,Longitude \n");
+        Boolean write=false;
+        if(write){
+            try (FileWriter csvWriter = new FileWriter("outputKNNQuery.csv")) {
+                // Write the CSV header
+                csvWriter.append("ID,Name,Latitude,Longitude \n");
 
-            // Loop through records and write each to the file
-            int counter=0;
-            for (LeafEntry leafRecord : queryRecords) {
-                counter++;
-                // Assuming findRecord() returns a comma-separated string "id,name,lat,lon"
-                csvWriter.append(counter + ". " + leafRecord.findRecord().toString());
-                csvWriter.append("\n");  // New line after each record
+                // Loop through records and write each to the file
+                int counter=0;
+                for (LeafEntry leafRecord : SequentialQueryRecords) {
+                    counter++;
+                    // Assuming findRecord() returns a comma-separated string "id,name,lat,lon"
+                    csvWriter.append(counter + ". " + leafRecord.findRecord().toString());
+                    csvWriter.append("\n");  // New line after each record
+                }
+            } catch (IOException e) {
+                System.err.println("Error writing to CSV file: " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.err.println("Error writing to CSV file: " + e.getMessage());
         }
-        System.out.println("Time taken: " + (double) (stopKNNTime - startKNNTime) / 1_000_000_000.0 + " seconds");
+
 
 
     }
