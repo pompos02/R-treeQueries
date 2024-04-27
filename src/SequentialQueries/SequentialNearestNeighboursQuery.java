@@ -9,8 +9,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-// Class used for executing a k-nearest neighbours query of a specific search point without any use of an index
-// Finds the k closest records of that search point
+/**
+ * Performs a k-nearest neighbour query sequentially on spatial data without using an index structure.
+ * This class scans all records to find the k closest points to a specified search point.
+ */
 public class SequentialNearestNeighboursQuery extends SequentialScanQuery {
     private ArrayList<Double> searchPoint;
     private int k;
@@ -24,13 +26,18 @@ public class SequentialNearestNeighboursQuery extends SequentialScanQuery {
         this.k = k;
         this.nearestNeighbours = new PriorityQueue<>(k, new Comparator<IdDistancePair>() {
             @Override
+            // This comparator ensures that the PriorityQueue acts as a max-heap based on the distance from the item.
             public int compare(IdDistancePair recordDistancePairA, IdDistancePair recordDistancePairB) {
                 return Double.compare(recordDistancePairB.getDistanceFromItem(),recordDistancePairA.getDistanceFromItem()); // In order to make a MAX heap
             }
         });
     }
 
-    // Returns the ids of the query's records
+    /**
+     * Executes the query to find the k-nearest neighbours.
+     *
+     * @return A list of LeafEntry objects representing the k closest records to the specified point.
+     */
     @Override
     public ArrayList<LeafEntry> getQueryRecords() {
         ArrayList<LeafEntry> qualifyingRecordIds = new ArrayList<>();
@@ -44,6 +51,9 @@ public class SequentialNearestNeighboursQuery extends SequentialScanQuery {
         return qualifyingRecordIds;
     }
 
+    /**
+     * Scans all records sequentially to find the nearest neighbours to the specified search point.
+     */
     private void findNeighbours(){
         int blockId = 1;
         while(blockId < helper.getTotalBlocksInDatafile())

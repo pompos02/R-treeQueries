@@ -3,7 +3,9 @@ package main.java.spatialtree;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-
+/**
+ * Represents a spatial record.
+ */
 public class Record implements Serializable {
     private long id; // The unique id of the record
 
@@ -28,7 +30,11 @@ public class Record implements Serializable {
         return coordinates.get(dimension);
     }
 
-
+    /**
+     * Provides a string representation of the record, for display purposes.
+     *
+     * @return A string that represents the record, including its ID, name, and coordinates.
+     */
     @Override
     public String toString() {
         StringBuilder recordToString = new StringBuilder(id + "," + name + "," + coordinates.get(0));

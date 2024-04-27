@@ -2,10 +2,12 @@ package main.java.spatialtree;
 
 import java.util.ArrayList;
 
-// Represents the entries on the bottom of the RStarTree
-// Extends the Entry Class where it's BoundingBox
-// is the bounding box of the spatial object (the record) indexed
-// also holds the recordId of the record and a pointer of the block which the record is saved in the datafile
+/**
+ * Represents a leaf node entry in an R*-tree.
+ * A LeafEntry extends the generic Entry class by including specific metadata
+ * such as the record ID and the datafile block ID
+ * where the actual spatial record is stored.
+ */
 public class LeafEntry extends Entry {
     private long recordId;
     private int dataFileBlockId; // The id of the block which the record is saved in the datafile
@@ -24,6 +26,11 @@ public class LeafEntry extends Entry {
         return dataFileBlockId;
     }
 
+    /**
+     * Retrieves the Record by iterating the block from the datafile using the block ID.
+     * This is used to print the actual records for testing purposes
+     * @return The Record if found, null otherwise.
+     */
     public Record findRecord(){
         ArrayList<Record> records = helper.readDataFile(this.getDataFileBlockId());
         if (records != null && !records.isEmpty()) {
@@ -40,6 +47,14 @@ public class LeafEntry extends Entry {
 
     }
 
+    /**
+     * Searches for the Record across all blocks in the data file.
+     * This method does not rely on the block ID and is used in the
+     * BulkLoaded implementation, as we can't hold the
+     * blockID in the BulkLoad
+     *This is used to print the actual records for testing purposes
+     * @return The Record if found, null otherwise.
+     */
     public Record findRecordWithoutBlockId(){
         ArrayList<Record> records = new ArrayList<>();
         for (int blockId = 1; blockId <= helper.getTotalBlocksInDatafile(); blockId++) {
@@ -73,7 +88,12 @@ public class LeafEntry extends Entry {
     }
 
 
-    // Fuction to compare Leaf Entries
+    /**
+     * Compares this LeafEntry to another object for equality based on record ID.
+     *
+     * @param obj The object to compare with this LeafEntry.
+     * @return true if the other object is a LeafEntry with the same record ID.
+     */
     public boolean equals(Object obj) {
         if ((obj instanceof LeafEntry && this.recordId == ((LeafEntry) obj).getRecordId())) {
             return true;

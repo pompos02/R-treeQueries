@@ -2,14 +2,21 @@ package main.java.spatialtree;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-
-// Represents the bounds of an interval in a single dimension
+/**
+ * Represents the bounds of an interval in a single dimension.
+ */
 public class Bounds implements Serializable {
     private double lower; // Representing the lower value of the interval
     private double upper; // Representing the upper value of the interval
 
-    // constructor of the class
-    // Since we have to do with bounds of an interval the lower Bound cannot be bigger than upper
+    /**
+     * Constructor for Bounds.
+     *
+     * @param lower The lower bound of the interval.
+     * @param upper The upper bound of the interval.
+     * @throws IllegalArgumentException If the lower bound is greater than the upper bound.
+     */
+
     public Bounds(double lower, double upper) {
         if (lower <= upper)
         {
@@ -20,16 +27,32 @@ public class Bounds implements Serializable {
             throw new IllegalArgumentException( "The lower value of the bounds cannot be bigger than the upper");
     }
 
+    /**
+     * Gets the lower bound of the interval.
+     *
+     * @return The lower bound.
+     */
     public double getLower() {
         return lower;
     }
 
-
+    /**
+     * Gets the upper bound of the interval.
+     *
+     * @return The upper bound.
+     */
     double getUpper() {
         return upper;
     }
 
-    // Returns an ArrayList with bounds for each dimension, including the the minimum bounds needed to fit the given entries
+    /**
+     * Finds the minimum bounds needed to encompass a set of entries in all dimensions.
+     * This method is used when you want to create a bounding box that encloses multiple entries.
+     *
+     * @param entries An ArrayList of Entry objects to encompass within the bounds.
+     * @return An ArrayList of Bounds objects representing the minimum bounds.
+     */
+
     static ArrayList<Bounds> findMinimumBounds(ArrayList<Entry> entries) {
         ArrayList<Bounds> minimumBounds = new ArrayList<>();
         // For each dimension finds the minimum interval needed for the entries to fit
@@ -41,8 +64,15 @@ public class Bounds implements Serializable {
         }
         return minimumBounds;
     }
-
-    // Returns an ArrayList with bounds for each dimension, including the the minimum bounds needed to merge the given bounding boxes
+    /**
+     * Finds the minimum bounds needed to encompass two bounding boxes.
+     * This is useful for merging bounding boxes when updating or inserting entries in the Tree.
+     *
+     * @param boundingBoxA The first bounding box to merge.
+     * @param boundingBoxB The second bounding box to merge.
+     * @return An ArrayList of Bounds objects representing the minimum bounds that enclose both bounding boxes.
+     */
+    
     static ArrayList<Bounds> findMinimumBounds(BoundingBox boundingBoxA, BoundingBox boundingBoxB) {
         ArrayList<Bounds> minimumBounds = new ArrayList<>();
         // For each dimension finds the minimum interval needed for the entries to fit

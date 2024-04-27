@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * This class is responsible for loading spatial data from an OSM XML file.
+ * The spatial data we acquire doesn't have to have a name
  */
 public class DataFileManagerNoName {
 
@@ -63,7 +64,7 @@ public class DataFileManagerNoName {
         }
 
         if (!entries.isEmpty()) {
-            System.out.println("Number of entries: " + entries.size());
+            System.out.println("Number of entries found in the .som file: " + entries.size());
         }
         return entries;
     }

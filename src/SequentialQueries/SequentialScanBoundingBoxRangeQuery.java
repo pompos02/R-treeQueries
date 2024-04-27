@@ -5,6 +5,10 @@ import main.java.spatialtree.*;
 
 import java.util.ArrayList;
 
+/**
+ * Implements a sequential scan range query to find records within a specified bounding box.
+ * This class extends SequentialScanQuery to perform non-indexed searches on spatial data.
+ */
 public class SequentialScanBoundingBoxRangeQuery extends SequentialScanQuery{
     private ArrayList<LeafEntry> qualifyingRecordIds; // Record ids used for queries
     private BoundingBox searchBoundingBox; // Bounding box used for range queries
@@ -12,8 +16,11 @@ public class SequentialScanBoundingBoxRangeQuery extends SequentialScanQuery{
     public SequentialScanBoundingBoxRangeQuery(BoundingBox searchBoundingBox) {
         this.searchBoundingBox = searchBoundingBox;
     }
-
-    // Returns the ids of the query's records
+    /**
+     * Executes the bounding box range query by performing a sequential scan of all records.
+     *
+     * @return A list of LeafEntry objects representing the records that fall within the specified bounding box.
+     */
     @Override
     public ArrayList<LeafEntry> getQueryRecords() {
         qualifyingRecordIds = new ArrayList<>();
@@ -21,6 +28,9 @@ public class SequentialScanBoundingBoxRangeQuery extends SequentialScanQuery{
         return qualifyingRecordIds;
     }
 
+    /**
+     * Scans through all blocks of data sequentially, checking each record against the bounding box to determine if it qualifies.
+     */
     private void search(){
         int blockId = 1;
         while(blockId < helper.getTotalBlocksInDatafile())

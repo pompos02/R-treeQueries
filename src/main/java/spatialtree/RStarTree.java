@@ -7,6 +7,9 @@ import queries.SkylineQuery;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Represents an R*-tree for spatial data indexing.
+ */
 public class RStarTree {
 
     private static int totalLevels; // The total levels of the tree, increasing the size starting of the root, the root (top level) will always have the highest level
@@ -15,9 +18,10 @@ public class RStarTree {
     private static final int LEAF_LEVEL = 1; // Constant leaf level 1, since we are increasing the level from the root, the root (top level) will always have the highest level
     private static final int CHOOSE_SUBTREE_P_ENTRIES = 35;
     private static final int REINSERT_P_ENTRIES = (int) (0.30 * Node.getMaxEntries()); // Setting p to 30% of max entries
-
-    // RStarTree constructor
-    // If insertRecordsFromDataFile parameter is true then makes a new root node since we are resetting the tree and inserting the records from the datafile
+    /**
+     * Constructs an R*-tree, optionally initializing it by inserting records from a data file.
+     * @param insertRecordsFromDataFile If true, initializes the tree with records from a data file.
+     */
     public RStarTree(boolean insertRecordsFromDataFile) {
         this.totalLevels = helper.getTotalLevelsOfTreeIndex(); // Initialise the total levels from the FileHelper class, in case there is an already existing indexFile
         int counter=0;
@@ -54,18 +58,13 @@ public class RStarTree {
         return LEAF_LEVEL;
     }
 
-    public static int gettotalLevels(){
-        return totalLevels;
-    }
-    // Query which returns the ids of the K Records that are closer to the given point
 
-
-    // Query which returns the ids of the Records that are inside the given searchBoundingBox
-
-
-    // Query which returns the ids of the Records that are inside the radius of the given point
-
-
+    /**
+     * Inserts a record into the tree at the leaf level.
+     *
+     * @param record The record to insert.
+     * @param datafileBlockId The block ID of the data file where the record is stored.
+     */
     private void insertRecord(Record record, int datafileBlockId) {
         ArrayList<Bounds> boundsForEachDimension = new ArrayList<>();
         // Since we have to do with points as records we set low and upper to be same
@@ -76,22 +75,49 @@ public class RStarTree {
         insert(null, null, new LeafEntry(record.getId(), datafileBlockId, boundsForEachDimension), LEAF_LEVEL); // Inserting on leaf level since it's a new record
     }
 
+    /**
+     * Retrieves all leaf entries that fall within a specified bounding box.
+     * Bounding box range query
+     *
+     * @param searchBoundingBox The bounding box to query against.
+     * @return A list of leaf entries within the bounding box.
+     */
     public ArrayList<LeafEntry> getDataInBoundingBox(BoundingBox searchBoundingBox){
         BoundingBoxRangeQuery query = new BoundingBoxRangeQuery(searchBoundingBox);
         return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
     }
-
+    /**
+     * Retrieves all leaf entries that form the skyline within a specified bounding box.
+     * Skyline query
+     *
+     * @param searchBoundingBox The bounding box to query against.
+     * @return A list of leaf entries that are part of the skyline.
+     */
     public ArrayList<LeafEntry> getSkyline(BoundingBox searchBoundingBox) {
         SkylineQuery query = new SkylineQuery(searchBoundingBox);
         return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
     }
+    /**
+     * Retrieves the nearest neighbors to a specified point.
+     * K-NN query
+     *
+     * @param searchPoint The point to find neighbors near.
+     * @param k The number of nearest neighbors to retrieve.
+     * @return A list of leaf entries representing the nearest neighbors.
+     */
     public ArrayList<LeafEntry> getNearestNeighbours(ArrayList<Double> searchPoint, int k){
         NearestNeighboursQuery query = new NearestNeighboursQuery(searchPoint,k);
         return query.getQueryRecords(helper.readIndexFileBlock(ROOT_NODE_BLOCK_ID));
     }
-    // Inserts nodes recursively. As an optimization, the algorithm steps are
-    // in a different order. If this returns a non null Entry, then
-    // that Entry should be added to the caller's Node of the R-tree
+    /**
+     * Recursively inserts a data entry into the tree, possibly causing a split of nodes.
+     *
+     * @param parentNode The parent node of the current recursion level.
+     * @param parentEntry The entry in the parent node that points to the current node.
+     * @param dataEntry The data entry to insert.
+     * @param levelToAdd The tree level at which to add the data entry.
+     * @return The entry resulting from a split, if any, or null if no split occurred.
+     */
     private Entry insert(Node parentNode, Entry parentEntry,  Entry dataEntry, int levelToAdd) {
 
         Node childNode;
@@ -162,8 +188,14 @@ public class RStarTree {
         return null;
     }
 
-    // Returns a the best Entry of the sub tree to place the new index entry
-    // The loop portion of this algorithm is taken out, so it only picks a subtree at that particular level
+    /**
+     * Selects the best subtree to accommodate a new entry based on the minimal enlargement and overlap criteria.
+     *
+     * @param node The current node being considered.
+     * @param boundingBoxToAdd The bounding box of the entry to insert.
+     * @param levelToAdd The level at which to add the entry.
+     * @return The best entry within the node to follow the path for insertion.
+     */
     private Entry chooseSubTree(Node node, BoundingBox boundingBoxToAdd, int levelToAdd) {
 
         Entry bestEntry;
@@ -219,7 +251,14 @@ public class RStarTree {
         return bestEntry;
     }
 
-    // Algorithm OverflowTreatment
+    /**
+     * Handles node overflows by either reinserting entries or splitting the node.
+     *
+     * @param parentNode The parent node of the overflowing node.
+     * @param parentEntry The entry pointing to the overflowing node.
+     * @param childNode The node that is overflowing.
+     * @return An entry that results from handling the overflow, which might require propagation upwards.
+     */
     private Entry overFlowTreatment(Node parentNode, Entry parentEntry, Node childNode) {
         //System.out.println("OVERFLOW TREATMENT CALLED");
         // If the level is not the root level and this is the first call of OverflowTreatment
@@ -231,8 +270,6 @@ public class RStarTree {
             return null;
         }
 
-        // TODO check this line might not be needed
-//        levelsInserted[childNode.getLevel()-1] = true; // Mark level as already inserted
 
         // Else invoke Split
         ArrayList<Node> splitNodes = childNode.splitNode(); // The two nodes occurring after the split
@@ -272,7 +309,13 @@ public class RStarTree {
         return null;
     }
 
-    // Algorithm reinsert
+    /**
+     * Reinserts entries from a node to handle overflows.
+     *
+     * @param parentNode The parent node.
+     * @param parentEntry The entry in the parent node that points to the current node.
+     * @param childNode The node from which entries are reinserted.
+     */
     private void reInsert(Node parentNode, Entry parentEntry, Node childNode) {
 
         if(childNode.getEntries().size() != Node.getMaxEntries() + 1)
@@ -304,6 +347,12 @@ public class RStarTree {
             insert(null,null,entry,childNode.getLevel());
     }
 
+    /**
+     * Attempts to delete a record from the tree.
+     *
+     * @param targetEntry The entry to delete.
+     * @return true if the entry was successfully deleted, false otherwise.
+     */
     public boolean deleteRecord(Entry targetEntry) {
         Node node = findLeafNode(targetEntry, getRoot());
         if (node == null){
@@ -327,6 +376,13 @@ public class RStarTree {
         return true; // Entry successfully deleted
     }
 
+    /**
+     * Finds the leaf node that contains the specified entry.
+     *
+     * @param targetEntry The entry to find.
+     * @param node The node to start the search from.
+     * @return The leaf node containing the entry, or null if not found.
+     */
     private Node findLeafNode(Entry targetEntry, Node node) {
         if (node.getLevel() == LEAF_LEVEL) {
             return node.contains(targetEntry) ? node : null;

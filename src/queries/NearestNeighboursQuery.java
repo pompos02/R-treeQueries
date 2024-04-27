@@ -6,13 +6,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.PriorityQueue;
 
-// Class used for executing a k-nearest neighbours query of a specific search point with the use of the RStarTree
-// Finds the k the closest records of that search point
+/**
+ * Executes a k-nearest neighbours query using an R*-tree to find the k closest records to a specified point.
+ */
 public class NearestNeighboursQuery extends Query {
     private ArrayList<Double> searchPoint; // The coordinates of point used for radius queries
     private double searchPointRadius; // The reference radius that is used as a bound
     private int k; // The number of nearest neighbours to be found
     private PriorityQueue<IdDistancePair> nearestNeighbours; // Using a max heap for the nearest neighbours
+
 
     public NearestNeighboursQuery(ArrayList<Double> searchPoint, int k) {
         if (k < 0)
@@ -24,8 +26,12 @@ public class NearestNeighboursQuery extends Query {
             return Double.compare(recordDistancePairB.getDistanceFromItem(), recordDistancePairA.getDistanceFromItem()); // In order to make a MAX heap
         });
     }
-
-    // Returns the ids of the query's records
+    /**
+     * Retrieves the nearest neighbour records found in the R*-tree starting from a given node.
+     *
+     * @param node The root node ( usually ) of the R*-tree from which the search starts.
+     * @return A list of LeafEntry objects representing the nearest neighbours.
+     */
     @Override
     public ArrayList<LeafEntry> getQueryRecords(Node node) {
         ArrayList<LeafEntry> qualifyingRecords = new ArrayList<>();
@@ -39,8 +45,13 @@ public class NearestNeighboursQuery extends Query {
         return qualifyingRecords;
     }
 
-    // Finds the nearest neighbours by using a branch and bound algorithm
-    // with the help of the RStarTree
+    /**
+     * Recursively searches the R*-tree to find and prioritize the nearest neighbours.
+     * This method employs a branch-and-bound approach that limits exploration based on
+     * the current search radius.
+     *
+     * @param node The current node in the R*-tree being explored.
+     */
     private void findNeighbours(Node node) {
         node.getEntries().sort(new EntryComparator.EntryDistanceFromPointComparator(node.getEntries(),searchPoint));
         int i = 0;

@@ -46,7 +46,7 @@ public class KNN {
         queryBounds.add(new Bounds(centerPoint.get(0) , centerPoint.get(0)));
         queryBounds.add(new Bounds(centerPoint.get(1), centerPoint.get(1)));
 
-        int k=4;
+        int k=100;
         System.out.print("Starting R*-Tree K-NN query: ");
         long startKNNTime = System.nanoTime();
         ArrayList<LeafEntry> queryRecords = rStarTree.getNearestNeighbours(centerPoint, k);

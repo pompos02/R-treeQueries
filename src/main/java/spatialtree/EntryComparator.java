@@ -5,10 +5,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-
-// Class used for comparing Entries based on different criteria
+/**
+ * A class containing multiple comparators for sorting or comparing Entry objects based on various criteria.
+ * These are used in the context of managing entries in the R*-tree.
+ */
 public class EntryComparator {
-    // Class used to compare entries by their lower or upper bounds
+    /**
+     * A comparator that compares two entries based on the values of their bounding box's bounds.
+     */
     static class EntryBoundComparator implements Comparator<Entry>
     {
         // Hash-map  used for mapping the comparison value of the Entries during the compare method
@@ -16,6 +20,13 @@ public class EntryComparator {
         // Value of the hash-map is the given Entry's bound (either upper or lower)
         private HashMap<Entry,Double> entryComparisonMap;
 
+        /**
+         * Constructs the comparator by mapping each entry to its bound value for comparison.
+         *
+         * @param entriesToCompare A list of entries to compare.
+         * @param dimension        The dimension along which to compare the entries.
+         * @param compareByUpper   Whether to compare by the upper bound (true) or lower bound (false).
+         */
         EntryBoundComparator(List<Entry> entriesToCompare, int dimension, boolean compareByUpper)
         {
             // Initialising hash-map
@@ -34,13 +45,16 @@ public class EntryComparator {
             }
         }
 
+        @Override
         public int compare(Entry entryA, Entry entryB)
         {
             return Double.compare(entryComparisonMap.get(entryA),entryComparisonMap.get(entryB));
         }
     }
-
-    // Class used to compare entries by their area enlargement of including a new BoundingBox ("rectangle" item)
+    /**
+     * A comparator that compares entries based on how much the area of their bounding box
+     * would be enlarged by including another bounding box.
+     */
     static class EntryAreaEnlargementComparator implements Comparator<Entry>
     {
         // Hash-map used for mapping the comparison value of the Entries during the compare method
@@ -77,8 +91,10 @@ public class EntryComparator {
                 return Double.compare(areaEnlargementA,areaEnlargementB);
         }
     }
-
-    // Class used to compare entries by their overlap enlargement of including a new "rectangle" item
+    /**
+     * Comparator for comparing entries based on the
+     * increase in overlap that would result from adding a new bounding box to each entry's bounding box.
+     */
     static class EntryOverlapEnlargementComparator implements Comparator<Entry>
     {
         private BoundingBox boundingBoxToAdd; // The bounding box to add
@@ -136,14 +152,16 @@ public class EntryComparator {
             return sum;
         }
     }
-
-    // Class used to compare entries by their distance from their overall's bouncing box's center
+    /**
+     * Comparator for comparing entries by the distance from the center of a specified bounding box.
+     */
     static class EntryDistanceFromCenterComparator implements Comparator<Entry>
     {
         // Hash-map  used for mapping the comparison value of the Entries during the compare method
         // Key of the hash-map is the given Entry
         // Value of the hash-map is the given Entry's BoundingBox distance from the given BoundingBox
         private HashMap<Entry,Double> entryComparisonMap;
+
 
         EntryDistanceFromCenterComparator(List<Entry>entriesToCompare, BoundingBox boundingBox) {
             // Initialising Hash-map
@@ -152,14 +170,15 @@ public class EntryComparator {
             for (Entry entry : entriesToCompare)
                 entryComparisonMap.put(entry,BoundingBox.findDistanceBetweenBoundingBoxes(entry.getBoundingBox(),boundingBox));
         }
-
+        @Override
         public int compare(Entry entryA, Entry entryB)
         {
             return Double.compare(entryComparisonMap.get(entryA),entryComparisonMap.get(entryB));
         }
     }
-
-    // Class used to compare entries by their distance from a point
+    /**
+     * Comparator for comparing entries based on their distance from a specific point.
+     */
     public static class EntryDistanceFromPointComparator implements Comparator<Entry>
     {
         // Hash-map  used for mapping the comparison value of the Entries during the compare method
@@ -174,7 +193,7 @@ public class EntryComparator {
             for (Entry entry : entriesToCompare)
                 entryComparisonMap.put(entry,entry.getBoundingBox().findMinDistanceFromPoint(point));
         }
-
+        @Override
         public int compare(Entry entryA, Entry entryB)
         {
             return Double.compare(entryComparisonMap.get(entryA),entryComparisonMap.get(entryB));

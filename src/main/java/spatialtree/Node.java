@@ -3,23 +3,31 @@ package main.java.spatialtree;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-
-// Class representing a Node of the RStarTree
+/**
+ * Represents a node in an R*-tree, which may contain either further nodes or leaf entries.
+ */
     public class Node implements Serializable {
         private static final int MAX_ENTRIES = helper.calculateMaxEntriesInNode(); // The maximum entries that a Node can fit based on the file parameters
         private static final int MIN_ENTRIES = (int)(0.4 * MAX_ENTRIES); // Setting m to 40%
         private int level; // The level of the tree that this Node is located
         private long blockId; // The unique ID of the file block that this Node refers to
         private ArrayList<Entry> entries; // The ArrayList with the Entries of the Node
-
-    // Root constructor with it's level as a parameter which makes a new empty ArrayList for the Node
+    /**
+     * Constructor for root node initialization.
+     *
+     * @param level The level at which the node exists within the tree.
+     */
     Node(int level) {
         this.level = level;
         this.entries = new ArrayList<>();
         this.blockId = RStarTree.getRootNodeBlockId();
     }
-
-    // Node constructor with level and entries parameters
+    /**
+     * General constructor for node with predefined entries.
+     *
+     * @param level The tree level of the node.
+     * @param entries List of entries for the node.
+     */
     Node(int level, ArrayList<Entry> entries) {
         this.level = level;
         this.entries = entries;
@@ -48,15 +56,21 @@ import java.util.Collections;
     public ArrayList<Entry> getEntries() {
         return entries;
     }
-
-    // Adds the given entry to the entries ArrayList of the Node
+    /**
+     * Adds an entry to the node.
+     *
+     * @param entry The entry to be added.
+     */
     void insertEntry(Entry entry)
     {
         entries.add(entry);
     }
 
-    // Splits the entries of the Node and divides them to two new Nodes
-    // Returns an ArrayList which
+    /**
+     * Splits the node into two when. This method determines the split strategy
+     *
+     * @return A list containing two new nodes as a result of the split.
+     */
     ArrayList<Node> splitNode() {
         ArrayList<Distribution> splitAxisDistributions = chooseSplitAxis();
         return chooseSplitIndex(splitAxisDistributions);
@@ -93,12 +107,12 @@ import java.util.Collections;
     }
 
 
-
-    // Returns the distributions of the best Axis
+    /**
+     * Helper method to choose the best split axis by evaluating the distribution of entries.
+     *
+     * @return A list of potential distributions along the chosen split axis.
+     */
     private ArrayList<Distribution> chooseSplitAxis() {
-        // For each axis sort the entries by the lower then by the upper
-        // value of their rectangles and determine all distributions as described above Compute S which is the
-        // sum of all margin-values of the different distributions
 
         ArrayList<Distribution> splitAxisDistributions = new ArrayList<>(); // for the different distributions
         double splitAxisMarginsSum = Double.MAX_VALUE;
@@ -123,10 +137,9 @@ import java.util.Collections;
             double sumOfMargins = 0;
             ArrayList<Distribution>  distributions = new ArrayList<>();
             // Determining distributions
-            // Total number of different distributions = M-2*m+2 for each sorted vector
             for (ArrayList<Entry> sortedEntryList: sortedEntries)
             {
-                for (int k = 1; k <= MAX_ENTRIES - 2* MIN_ENTRIES +2; k++) //TODO CHECK FOR "="
+                for (int k = 1; k <= MAX_ENTRIES - 2* MIN_ENTRIES +2; k++)
                 {
                     ArrayList<Entry> firstGroup = new ArrayList<>();
                     ArrayList<Entry> secondGroup = new ArrayList<>();
@@ -156,7 +169,12 @@ import java.util.Collections;
         return splitAxisDistributions;
     }
 
-    // Returns a vector of Nodes, containing the two nodes that occurred from the split
+    /**
+     * Choose the best split index from the available distributions and return the resulting nodes.
+     *
+     * @param splitAxisDistributions The list of potential distributions to consider for splitting.
+     * @return A list of two new nodes resulting from the split.
+     */
     private ArrayList<Node> chooseSplitIndex(ArrayList<Distribution> splitAxisDistributions) {
 
         if (splitAxisDistributions.size() == 0)
@@ -198,6 +216,12 @@ import java.util.Collections;
         return splitNodes;
     }
 
+    /**
+     * Checks if this node contains an entry with a bounding box that overlaps with the target entry.
+     *
+     * @param targetEntry The entry to check against the entries in this node.
+     * @return true if there is an overlap, false otherwise.
+     */
     public boolean contains(Entry targetEntry) {
         for (Entry entry : entries) {
             if (BoundingBox.checkOverlap(entry.getBoundingBox(), targetEntry.getBoundingBox())) {

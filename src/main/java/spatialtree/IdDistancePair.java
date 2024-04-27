@@ -1,6 +1,8 @@
 package main.java.spatialtree;
-
-// Class which is used to hold the record it's distance from a specific item
+/**
+ * Class used to associate a record (LeafEntry) with its distance from a specific item.
+ * Essential for K-NN
+ */
 public class IdDistancePair {
     private LeafEntry record; // The id of the record
     private double distanceFromItem; // The distance from an item
@@ -11,10 +13,6 @@ public class IdDistancePair {
     }
 
     public LeafEntry getRecord(){ return this.record;}
-    public long getRecordId() {
-        return this.record.getRecordId();
-    }
-
 
     public double getDistanceFromItem() {
         return distanceFromItem;

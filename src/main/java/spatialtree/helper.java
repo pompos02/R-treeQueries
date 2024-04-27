@@ -4,17 +4,29 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-
+/**
+ * Utility class for handling operations related to the R*-Tree,
+ * focusing on file management, serialization, and other helper functions.
+ */
 public class helper {
 
     protected static final String PATH_TO_DATAFILE = "datafile.dat";
     protected static final String PATH_TO_INDEXFILE = "indexfile.dat";
     protected static final int BLOCK_SIZE = 32 * 1024; // Each Block is 32KB
-    static int dataDimensions; // The data's used dimensions
-    protected static int totalBlocksInDatafile;  // The total blocks written in the datafile
-    protected static int totalBlocksInIndexFile; // The total blocks written in the indexfile
-    protected static int totalLevelsOfTreeIndex; // The total levels of the rStar tree
 
+
+    // Static variables for dimensions of data, and the total number of blocks and levels in data and index files.
+    static int dataDimensions;
+    protected static int totalBlocksInDatafile;
+    protected static int totalBlocksInIndexFile;
+    protected static int totalLevelsOfTreeIndex;
+
+    /**
+     * Serializes an object to a byte array.
+     * @param obj The object to serialize.
+     * @return The byte array representation of the object.
+     * @throws IOException if an I/O error occurs during serialization.
+     */
     static byte[] serialize(Object obj) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ObjectOutputStream os = new ObjectOutputStream(out);
@@ -22,13 +34,24 @@ public class helper {
         return out.toByteArray();
     }
 
-    // Used to deserializable a byte array to a serializable Object
+    /**
+     * Deserializes a byte array back to an object.
+     * @param data The byte array to deserialize.
+     * @return The deserialized object.
+     * @throws IOException if an I/O error occurs during deserialization.
+     * @throws ClassNotFoundException if the class of the serialized object cannot be found.
+     */
     static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
         ByteArrayInputStream in = new ByteArrayInputStream(data);
         ObjectInputStream is = new ObjectInputStream(in);
         return is.readObject();
     }
 
+    /**
+     * Updates metadata in a file based on the path specified.
+     * Metadata includes dimensions, block size, total blocks, and tree levels.
+     * @param pathToFile Decides what Metadata will change (Index or Data).
+     */
     static void updateMetaData(String pathToFile) {
         try {
             ArrayList<Integer> dataFileMetaData = new ArrayList<>();
@@ -65,7 +88,11 @@ public class helper {
         return totalLevelsOfTreeIndex;
     }
 
-
+    /**
+     * Reads and returns the metadata from the specified file path.
+     * @param pathToFile The file path from which metadata is read (Always on Datafile.dat).
+     * @return An ArrayList of Integers containing the metadata.
+     */
     static ArrayList<Integer> readMetaData(String pathToFile){
         try {
             RandomAccessFile raf = new RandomAccessFile(new File(pathToFile), "rw");
@@ -88,15 +115,10 @@ public class helper {
         }
         return null;
     }
-    /**
-     * Converts a SpatialDataEntry to a Record object.
-     * @param entry The SpatialDataEntry to convert.
-     * @return A new Record based on the entry data.
-     */
 
 
     /**
-     * Initializes or resets the data file and writes spatial data entries into it.
+     * Initializes or resets the data file and writes spatial data entries into it if needed.
      * @param records List of SpatialDataEntry objects to write into the file.
      * @param dataDimensions The number of dimensions each data entry uses.
      * @param makeNewDataFile Flag to determine if a new file should be created.
@@ -145,6 +167,14 @@ public class helper {
         }
     }
 
+    /**
+     * Creates or updates the index file based on the specified parameters.
+     * If the file exists and no new file creation is requested, it reads and updates based on existing data.
+     * Otherwise, it creates a new file or resets an existing file based on the input data dimensions.
+     *
+     * @param dataDimensions The dimensionality of the data to be handled in the index file.
+     * @param makeNewDataFile A boolean flag indicating whether a new index file should be created.
+     */
     public static void CreateIndexFile(int dataDimensions, boolean makeNewDataFile) throws IOException {
         try {
             if (!makeNewDataFile && Files.exists(Paths.get(PATH_TO_INDEXFILE)))
@@ -182,7 +212,12 @@ public class helper {
 
     }
 
-
+    /**
+     * Writes a list of Record objects to the data file in blocks of specified BLOCK_SIZE.
+     * Ensures that the data written does not exceed the block size and handles block management.
+     *
+     * @param blockRecords The list of Record objects to be written.
+     */
     public static void writeDataFileBlock(ArrayList<Record> blockRecords) {
         try {
             byte[] recordInBytes = serialize(blockRecords);
@@ -200,22 +235,36 @@ public class helper {
         }
     }
 
-    public static ArrayList<Record> readDataFile(int blockId){
-        try {
-            RandomAccessFile raf = new RandomAccessFile(new File(PATH_TO_DATAFILE), "r");
-            FileInputStream fis = new FileInputStream(raf.getFD());
-            BufferedInputStream bis = new BufferedInputStream(fis);
-            //go to the expected block
-            raf.seek(blockId*BLOCK_SIZE);
-            byte[] block = new byte[BLOCK_SIZE];
-            bis.read(block,0,BLOCK_SIZE);
-            byte[] LengthInBytes = serialize( Integer.parseInt("1")); // producing the integer size
-            System.arraycopy(block, 0, LengthInBytes, 0, LengthInBytes.length);
+    /**
+     * Reads a specific block from the data file and deserializes it into a list of Record objects.
+     *
+     * @param blockId The block ID to read from the data file.
+     * @return A list of Record objects read from the specified block.
+     */
 
-            byte[] recordsInBlock = new byte[(Integer)deserialize(LengthInBytes)];
-            System.arraycopy(block, LengthInBytes.length, recordsInBlock, 0, recordsInBlock.length);
+    public static ArrayList<Record> readDataFile(int blockId) {
+        // Declare the path to the data file
+        String dataFilePath = PATH_TO_DATAFILE;
+        byte[] block = new byte[BLOCK_SIZE];
 
-            return (ArrayList<Record>)deserialize(recordsInBlock);
+        try (RandomAccessFile raf = new RandomAccessFile(new File(dataFilePath), "r");
+             FileInputStream fis = new FileInputStream(raf.getFD());
+             BufferedInputStream bis = new BufferedInputStream(fis)) {
+
+            // Go to the expected block
+            raf.seek(blockId * BLOCK_SIZE);
+            if (bis.read(block, 0, BLOCK_SIZE) != BLOCK_SIZE) {
+                throw new IOException("Could not read the complete block");
+            }
+
+            // Process the block to extract records
+            byte[] lengthInBytes = serialize(Integer.parseInt("1"));  // Example size, likely needs adjustment
+            System.arraycopy(block, 0, lengthInBytes, 0, lengthInBytes.length);
+
+            byte[] recordsInBlock = new byte[(Integer) deserialize(lengthInBytes)];
+            System.arraycopy(block, lengthInBytes.length, recordsInBlock, 0, recordsInBlock.length);
+
+            return (ArrayList<Record>) deserialize(recordsInBlock);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -223,6 +272,13 @@ public class helper {
         return null;
     }
 
+
+    /**
+     * Estimates the maximum number of entries that can be stored in a node without exceeding the block size.
+     * This method is useful for determining the capacity of nodes within the R*-tree structure.
+     *
+     * @return The maximum number of entries per node.
+     */
     static int calculateMaxEntriesInNode() {
         ArrayList<Entry> entries = new ArrayList<>();
         int i;
@@ -246,6 +302,13 @@ public class helper {
         }
         return i;
     }
+
+    /**
+     * Writes a serialized node to the index file.
+     *
+     * @param node The Node object to write to the index file.
+     */
+
     static void writeNewIndexFileBlock(Node node) {
         try {
             byte[] nodeInBytes = serialize(node);
@@ -262,10 +325,14 @@ public class helper {
             e.printStackTrace();
         }
     }
+    /**
+     * Updates the indexFile block with the corresponding given already saved Node
+     * In case node's block id is the root's and the given parameter totalLevelsOfTreeIndex
+     * is changed during the tree's changes then the totalLevelsOfTreeIndex variable's value is increased by one
+     * @param node The node to update in the index file.
+     * @param totalLevelsOfTreeIndex The current total levels of the tree, used to check for updates in tree depth.
+     */
 
-    // Updates the indexFile block with the corresponding given already saved Node
-    // In case node's block id is the root's and the given parameter totalLevelsOfTreeIndex is changed during the tree's changes then
-    // the totalLevelsOfTreeIndex variable's value is increased by one
     static void updateIndexFileBlock(Node node, int totalLevelsOfTreeIndex) {
         try {
             byte[] nodeInBytes = serialize(node);
@@ -293,6 +360,11 @@ public class helper {
         return totalBlocksInDatafile;
     }
 
+    /**
+     * Updates the levels of the R*-tree stored in the index file's metadata. This is typically called after a structural
+     * change in the tree that affects its depth (e.g., a split at the root causing an increase in tree height).
+     */
+
     public static void updateLevelsOfTreeInIndexFile()
     {
         try {
@@ -316,6 +388,12 @@ public class helper {
 
 
     }
+    /**
+     * Reads a specific block from the index file, interpreting it as a Node object.
+     *
+     * @param blockId The block ID to read, which corresponds to a specific node in the R*-tree.
+     * @return The Node object deserialized from the specified block.
+     */
 
     public static Node readIndexFileBlock(long blockId){
         try {
@@ -343,6 +421,11 @@ public class helper {
         }
         return null;
     }
+    /**
+     * Sorts a list of Record objects based on the value of a specified dimension (dimension 0).
+     * used in the BulkLoaded implementation
+     * @param records The list of records to sort.
+     */
     public static void RecordSorterX(List<Record> records){
         Collections.sort(records, new Comparator<Record>() {
             @Override
@@ -350,21 +433,5 @@ public class helper {
                 return Double.compare(r1.getCoordinate(0), r2.getCoordinate(0));
             }
         });
-    }
-
-    public static void main(String[] args) {
-        // Example usage
-        ArrayList<Record> records = new ArrayList<>();
-        records.add(new Record(1, "Record A", new ArrayList<Double>(List.of(3.0, 4.0))));
-        records.add(new Record(2, "Record B", new ArrayList<Double>(List.of(1.0, 2.0))));
-        records.add(new Record(3, "Record C", new ArrayList<Double>(List.of(2.0, 3.0))));
-
-        System.out.println("Before sorting:");
-        records.forEach(System.out::println);
-
-        RecordSorterX(records);
-
-        System.out.println("After sorting:");
-        records.forEach(System.out::println);
     }
 }

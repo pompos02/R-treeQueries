@@ -3,24 +3,37 @@ package main.java.spatialtree;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-// An Entry refers to the address of a lower Node (child) in the RStarTree and to it's BoundingBox (it's covering rectangle),
-// which covers all the bounding boxes in the lower Node's Entries
+/**
+ * Represents an entry in an R*-tree, which contains a bounding box and a reference to a child node.
+ * The bounding box covers all the child node's entries' bounding boxes.
+ */
 public class Entry implements Serializable {
     private BoundingBox boundingBox; // The closed bounded intervals describing the extent of the object along each dimension
     private Long childNodeBlockId; // The address (block ID) of a lower Node (child) in the RStarTree
-
-    // Constructor which takes parameters the lower Node which represents the child node of the entry
+    /**
+     * Constructs an Entry that refers to a child node and sets up its bounding box.
+     *
+     * @param childNode The child node this entry will refer to.
+     */
     Entry(Node childNode) {
         this.childNodeBlockId = childNode.getBlockId();
         adjustBBToFitEntries(childNode.getEntries()); // Adjusting the BoundingBox of the Entry to fit the objects of the childNode
     }
-
-    // Constructor which takes parameters the lower Node which represents the child node of the entry
+    /**
+     * Constructs an Entry with a specified bounding box.
+     *
+     * @param boundingBox The bounding box of the entry.
+     */
     Entry(BoundingBox boundingBox)
     {
         this.boundingBox = boundingBox;
     }
-
+    /**
+     * Constructs an Entry with a bounding box and a child node block ID.
+     *
+     * @param bb The bounding box of the entry.
+     * @param blockId The block ID of the child node.
+     */
     public Entry(BoundingBox bb, long blockId) {
         this.boundingBox=bb;
         this.childNodeBlockId=blockId;
@@ -41,15 +54,19 @@ public class Entry implements Serializable {
     public Long getChildNodeBlockId() {
         return childNodeBlockId;
     }
-
-    // Adjusting the Bouncing Box of the entry by assigning a new bounding box to it with the new minimum bounds
-    // based on the ArrayList parameter entries
+    /**
+     * Adjusts the bounding box to fit the given entries.
+     * the new bounding box consists of the new minimum bounds created
+     * @param entries The entries to be enclosed by the bounding box.
+     */
     void adjustBBToFitEntries(ArrayList<Entry> entries){
         boundingBox = new BoundingBox(Bounds.findMinimumBounds(entries));
     }
-
-    // Adjusting the Bouncing Box of the entry by assigning a new bounding box to it with the extended minimum bounds
-    // that also enclose the given Entry parameter entryToInclude
+    /**
+     * Adjusts the bounding box to include another entry's bounding box.
+     *
+     * @param entryToInclude The entry to be included in the bounding box.
+     */
     void adjustBBToFitEntry(Entry entryToInclude){
         boundingBox = new BoundingBox(Bounds.findMinimumBounds(boundingBox,entryToInclude.getBoundingBox()));
     }
@@ -58,10 +75,11 @@ public class Entry implements Serializable {
         return false; // Default implementation for non-leaf nodes
     }
 
+    // Overridden equals method to compare entries. This default implementation always returns false.
+    // TODO check this!
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof LeafEntry)) return false;
         return false;
     }
 

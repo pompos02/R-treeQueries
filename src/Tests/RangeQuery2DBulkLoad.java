@@ -13,6 +13,7 @@ public class RangeQuery2DBulkLoad {
 
     public static void main(String[] args) throws IOException {
         // Test initialization
+        // You should always create new data and index files in bulk-load
         List<Record> records = DataFileManagerWithName.loadDataFromFile("malta.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
