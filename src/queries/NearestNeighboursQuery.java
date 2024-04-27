@@ -2,7 +2,9 @@ package queries;
 
 import main.java.spatialtree.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.PriorityQueue;
 
 // Class used for executing a k-nearest neighbours query of a specific search point with the use of the RStarTree
 // Finds the k the closest records of that search point

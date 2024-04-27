@@ -5,7 +5,6 @@ import queries.NearestNeighboursQuery;
 import queries.SkylineQuery;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static main.java.spatialtree.helper.RecordSorterX;

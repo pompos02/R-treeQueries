@@ -1,8 +1,7 @@
 package queries;
 
-import main.java.spatialtree.LeafEntry;
-import main.java.spatialtree.Node;
 import main.java.spatialtree.*;
+
 import java.util.ArrayList;
 import java.util.List;
 

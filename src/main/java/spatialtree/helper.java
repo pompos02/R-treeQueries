@@ -1,15 +1,13 @@
 package main.java.spatialtree;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class helper {
 
-    protected static final String PATH_TO_DATAFILE = "datafile.dat";
+    protected static final String PATH_TO_DATAFILE = "datafileFIE.dat";
     protected static final String PATH_TO_INDEXFILE = "indexfile.dat";
     protected static final int BLOCK_SIZE = 32 * 1024; // Each Block is 32KB
     static int dataDimensions; // The data's used dimensions
@@ -60,7 +58,7 @@ public class helper {
         return totalBlocksInIndexFile;
     }
     public static void setTotalBlocksInIndexFile(int newIndex){totalBlocksInIndexFile=newIndex;}
-    static int getDataDimensions() {
+    public static int getDataDimensions() {
         return dataDimensions;
     }
     public static int getTotalLevelsOfTreeIndex() {
@@ -105,30 +103,42 @@ public class helper {
      */
     public static void CreateDataFile(List<Record> records, int dataDimensions, boolean makeNewDataFile) {
         try {
-            if (makeNewDataFile) {
-                Files.deleteIfExists(Paths.get(PATH_TO_DATAFILE)); // Resetting/Deleting dataFile data
-            }
-            helper.dataDimensions=dataDimensions;
-            if (dataDimensions <= 0)
-                throw new IllegalStateException("The number of data dimensions must be a positive integer");
+            if (!makeNewDataFile && Files.exists(Paths.get(PATH_TO_DATAFILE)))
+            {
+                ArrayList<Integer> dataFileMetaData = readMetaData(PATH_TO_DATAFILE);
+                if (dataFileMetaData == null)
+                    throw new IllegalStateException("Could not read datafile's Meta Data Block properly");
+                helper.dataDimensions = dataFileMetaData.get(0);
+                if (helper.dataDimensions  <= 0)
+                    throw new IllegalStateException("The number of data dimensions must be a positive integer");
+                if (dataFileMetaData.get(1) != BLOCK_SIZE)
+                    throw new IllegalStateException("Block size read was not of " + BLOCK_SIZE + " bytes");
+                totalBlocksInDatafile = dataFileMetaData.get(2);
+                if (totalBlocksInDatafile  < 0)
+                    throw new IllegalStateException("The total blocks of the datafile cannot be a negative number");
+            }else{
+                Files.deleteIfExists(Paths.get(PATH_TO_DATAFILE));
+                helper.dataDimensions=dataDimensions;
+                if (dataDimensions <= 0)
+                    throw new IllegalStateException("The number of data dimensions must be a positive integer");
 
 
-            updateMetaData(PATH_TO_DATAFILE);
-            ArrayList<Record> blockRecords = new ArrayList<>();
-            int currentBlockSize=0;
-            for (Record record : records) {
-                byte [] recordBytes = serialize(record);
-                if (currentBlockSize + recordBytes.length > BLOCK_SIZE) {
-                    writeDataFileBlock(blockRecords);
-                    blockRecords = new ArrayList<>();
-                    currentBlockSize = 0;
+                updateMetaData(PATH_TO_DATAFILE);
+                ArrayList<Record> blockRecords = new ArrayList<>();
+                int currentBlockSize=0;
+                for (Record record : records) {
+                    byte [] recordBytes = serialize(record);
+                    if (currentBlockSize + recordBytes.length > BLOCK_SIZE) {
+                        writeDataFileBlock(blockRecords);
+                        blockRecords = new ArrayList<>();
+                        currentBlockSize = 0;
+                    }
+
+                    blockRecords.add(record);
+                    currentBlockSize+=recordBytes.length;
                 }
-
-                blockRecords.add(record);
-                currentBlockSize+=recordBytes.length;
+                writeDataFileBlock(blockRecords); // fill the leftovers
             }
-            writeDataFileBlock(blockRecords); // fill the leftovers
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -137,18 +147,34 @@ public class helper {
 
     public static void CreateIndexFile(int dataDimensions, boolean makeNewDataFile) throws IOException {
         try {
-            if (makeNewDataFile) {
-                Files.deleteIfExists(Paths.get(PATH_TO_DATAFILE)); // Resetting/Deleting dataFile data
+            if (!makeNewDataFile && Files.exists(Paths.get(PATH_TO_INDEXFILE)))
+            {
+                ArrayList<Integer> indexFileMetaData = readMetaData(PATH_TO_INDEXFILE);
+                if (indexFileMetaData == null)
+                    throw new IllegalStateException("Could not read datafile's Meta Data Block properly");
+                helper.dataDimensions = indexFileMetaData.get(0);
+                if (helper.dataDimensions  <= 0)
+                    throw new IllegalStateException("The number of data dimensions must be a positive integer");
+                if (indexFileMetaData.get(1) != BLOCK_SIZE)
+                    throw new IllegalStateException("Block size read was not of " + BLOCK_SIZE + " bytes");
+                totalBlocksInIndexFile = indexFileMetaData.get(2);
+                if (totalBlocksInIndexFile  < 0)
+                    throw new IllegalStateException("The total blocks of the index file cannot be a negative number");
+                totalLevelsOfTreeIndex = indexFileMetaData.get(3);
+                if (totalLevelsOfTreeIndex  < 0)
+                    throw new IllegalStateException("The total index's tree levels cannot be a negative number");
+            }else{
+                Files.deleteIfExists(Paths.get(PATH_TO_INDEXFILE)); // Resetting/Deleting dataFile data
+                helper.dataDimensions = dataDimensions;
+                if (dataDimensions <= 0)
+                    throw new IllegalStateException("The number of data dimensions must be a positive integer");
+                Files.deleteIfExists(Paths.get(PATH_TO_INDEXFILE)); // Resetting/Deleting index file data
+                helper.dataDimensions = dataDimensions;
+                totalLevelsOfTreeIndex = 1; // increasing the size from the root, the root (top level) will always have the highest level
+                if (helper.dataDimensions <= 0)
+                    throw new IllegalStateException("The number of data dimensions must be a positive integer");
+                updateMetaData(PATH_TO_INDEXFILE);
             }
-            helper.dataDimensions = dataDimensions;
-            if (dataDimensions <= 0)
-                throw new IllegalStateException("The number of data dimensions must be a positive integer");
-            Files.deleteIfExists(Paths.get(PATH_TO_INDEXFILE)); // Resetting/Deleting index file data
-            helper.dataDimensions = dataDimensions;
-            totalLevelsOfTreeIndex = 1; // increasing the size from the root, the root (top level) will always have the highest level
-            if (helper.dataDimensions <= 0)
-                throw new IllegalStateException("The number of data dimensions must be a positive integer");
-            updateMetaData(PATH_TO_INDEXFILE);
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -174,7 +200,7 @@ public class helper {
         }
     }
 
-    static ArrayList<Record> readDataFile(int blockId){
+    public static ArrayList<Record> readDataFile(int blockId){
         try {
             RandomAccessFile raf = new RandomAccessFile(new File(PATH_TO_DATAFILE), "r");
             FileInputStream fis = new FileInputStream(raf.getFD());

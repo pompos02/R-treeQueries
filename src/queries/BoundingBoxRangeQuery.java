@@ -1,7 +1,6 @@
 package queries;
 
 import main.java.spatialtree.*;
-import main.java.spatialtree.Record;
 
 import java.util.ArrayList;
 

@@ -1,7 +1,8 @@
 package Tests;
 
-import main.java.spatialtree.*;
+import SequentialQueries.SequentialScanBoundingBoxRangeQuery;
 import main.java.spatialtree.Record;
+import main.java.spatialtree.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,34 +13,48 @@ public class RangeQuery2DBulkLoad {
 
     public static void main(String[] args) throws IOException {
         // Test initialization
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
+        List<Record> records = DataFileManagerWithName.loadDataFromFile("malta.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
-        System.out.println("DONE");
         System.out.println("creating index file: ");
         helper.CreateIndexFile(2,false);
-        System.out.println("DONE");
-        System.out.println("creating r*-tree");
+        System.out.println("creating R*-Tree");
         BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
-        System.out.println("DONE");
-        System.out.println("total blocks in index file : " + helper.getTotalBlocksInIndexFile());
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         // 7111836589,,31.72438,28.42733
         //all of malta: 14.2932,14.6000,    36.0224,35.7700
         //center 14.4343,14.4511,35.8779,35.8922
-        double off=0.1;
+        double off=0.01;
         queryBounds.add(new Bounds(35.9-off , 35.9+off));
         queryBounds.add(new Bounds(14.4-off , 14.4+off));
 
 
-        System.out.print("Starting range query: ");
+        System.out.println("Starting RangeQuery in R*-tree : ");
         long startRangeQueryTime = System.nanoTime();
-        ArrayList<LeafEntry> queryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
+        ArrayList<LeafEntry> TreeQueryRecords = rStarTree.getDataInBoundingBox(new BoundingBox(queryBounds));
         long stopRangeQueryTime = System.nanoTime();
+        System.out.println("Records found in the given region: " + TreeQueryRecords.size());
+        System.out.println("Time taken R*-Tree:  " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
 
-        System.out.print("range query Done ");
-        System.out.println("Entires found in the given region: " + queryRecords.size());
-        System.out.println("Time taken: " + (double) (stopRangeQueryTime - startRangeQueryTime) / 1_000_000_000.0 + " seconds");
+        System.out.println("---------------------------------------------------------------");
+
+        // Sequential Scan - Range Query
+        System.out.println("Starting RangeQuery With Sequential scan : ");
+        SequentialScanBoundingBoxRangeQuery sequentialScanBoundingBoxRangeQuery = new SequentialScanBoundingBoxRangeQuery(new BoundingBox(queryBounds));
+        long startSequentialRangeQueryTime = System.nanoTime();
+        ArrayList<LeafEntry> SequentialQueryRecords=sequentialScanBoundingBoxRangeQuery.getQueryRecordIds();
+        long stopSequentialRangeQueryTime = System.nanoTime();
+        System.out.println("Records found in the given region: " + SequentialQueryRecords.size());
+        System.out.println("Time taken Sequential scan:  " + (double) (stopSequentialRangeQueryTime - startSequentialRangeQueryTime) / 1_000_000_000.0 + " seconds");
+
+
+
+
+
+
+
+
+
 
 
         boolean write=false;
@@ -52,7 +67,7 @@ public class RangeQuery2DBulkLoad {
 
                 // Loop through records and write each to the file
                 int counter=0;
-                for (LeafEntry leafRecord : queryRecords) {
+                for (LeafEntry leafRecord : TreeQueryRecords) {
                     counter++;
                     // Assuming findRecord() returns a comma-separated string "id,name,lat,lon"
                     csvWriter.append(counter + ". " + leafRecord.findRecordWithoutBlockId().toString());

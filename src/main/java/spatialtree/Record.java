@@ -18,12 +18,12 @@ public class Record implements Serializable {
         this.coordinates = coordinates;
     }
 
-    long getId() {
+    public long getId() {
         return id;
     }
 
 
-    double getCoordinate(int dimension)
+    public double getCoordinate(int dimension)
     {
         return coordinates.get(dimension);
     }

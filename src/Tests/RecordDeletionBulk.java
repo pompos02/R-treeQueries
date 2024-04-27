@@ -1,7 +1,7 @@
 package Tests;
 
-import main.java.spatialtree.*;
 import main.java.spatialtree.Record;
+import main.java.spatialtree.*;
 
 import java.io.FileWriter;
 import java.io.IOException;

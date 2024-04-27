@@ -1,11 +1,11 @@
 package main.java.spatialtree;
 
-import queries.*;
+import queries.BoundingBoxRangeQuery;
+import queries.NearestNeighboursQuery;
+import queries.SkylineQuery;
 
-import javax.management.Query;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Queue;
 
 public class RStarTree {
 
