@@ -7,7 +7,7 @@ import java.util.*;
 
 public class helper {
 
-    protected static final String PATH_TO_DATAFILE = "datafileFIE.dat";
+    protected static final String PATH_TO_DATAFILE = "datafile.dat";
     protected static final String PATH_TO_INDEXFILE = "indexfile.dat";
     protected static final int BLOCK_SIZE = 32 * 1024; // Each Block is 32KB
     static int dataDimensions; // The data's used dimensions

@@ -33,7 +33,7 @@ public class RangeQuery2D {
     }
     public static void main(String[] args) throws IOException {
 
-        boolean reconstruct = false;
+        boolean reconstruct = true;
 
         RStarTree rStarTree= rStarTreeMaker(reconstruct);
 
