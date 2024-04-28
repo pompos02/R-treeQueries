@@ -40,7 +40,7 @@ public class Run2DQueries {
         ArrayList<Double> centerPoint = new ArrayList<>(); // ArrayList with the coordinates of an approximate center point
         centerPoint.add(35.9); // Coordinate of second dimension
         centerPoint.add(14.4); // Coordinate of first dimension
-        double rangeIncrement = 0.0000025;
+        double rangeIncrement = 0.000035;
         // ------------------------------------------------------------------------
         // Range Query Data
         ArrayList<Double> rStarRangeQueryTimes = new ArrayList<>();
