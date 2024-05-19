@@ -16,7 +16,7 @@ public class KNNBulk {
         centerPoint.add(34.701862); // Coordinate of first dimension
         //205. 60170093,Μέσα Γειτονιά,34.701862,33.0449947 for map.osm
         System.out.println("Initializing files:");
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
         helper.CreateDataFile(records,2, true);
         helper.CreateIndexFile(2,false);
         System.out.println("creating R*-tree");

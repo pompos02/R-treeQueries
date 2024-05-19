@@ -11,7 +11,7 @@ import java.util.List;
 public class RecordDeletion {
     public static void main(String[] args) throws IOException {
         System.out.println("Initializing the files: ");
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
         helper.CreateDataFile(records,2, true);
         helper.CreateIndexFile(2,false);
 

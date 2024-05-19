@@ -14,18 +14,18 @@ public class RangeQuery2DBulkLoad {
     public static void main(String[] args) throws IOException {
         // Test initialization
         // You should always create new data and index files in bulk-load
-        List<Record> records = DataFileManagerWithName.loadDataFromFile("malta.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
         System.out.println("creating datafile: ");
         helper.CreateDataFile(records,2, true);
         System.out.println("creating index file: ");
-        helper.CreateIndexFile(2,true);
+        helper.CreateIndexFile(2,false);
         System.out.println("creating R*-Tree");
         BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
         ArrayList<Bounds> queryBounds = new ArrayList<>();
         // 7111836589,,31.72438,28.42733
         //all of malta: 14.2932,14.6000,    36.0224,35.7700
         //center 14.4343,14.4511,35.8779,35.8922
-        double off=0.01;
+        double off=0.000035 * 100;
         queryBounds.add(new Bounds(35.9-off , 35.9+off));
         queryBounds.add(new Bounds(14.4-off , 14.4+off));
 
@@ -58,10 +58,9 @@ public class RangeQuery2DBulkLoad {
 
 
 
-        boolean write=false;
+        boolean write=true;
         if(write){
-            System.out.println("writing them to output2DRangeQuery.csv ");
-            System.out.println("Total levels of the tree: " + helper.getTotalLevelsOfTreeIndex());
+            System.out.println("writing them to output2DRangeQueryBulkLoaded.csv ");
             try (FileWriter csvWriter = new FileWriter("output2DRangeQueryBulkLoaded.csv")) {
                 // Write the CSV header
                 csvWriter.append("ID,Name,Latitude,Longitude \n");

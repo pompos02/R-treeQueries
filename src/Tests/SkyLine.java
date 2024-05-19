@@ -14,7 +14,7 @@ public class SkyLine {
 
 
         System.out.println("Initializing files:");
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("map.osm");
+        List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
         helper.CreateDataFile(records,2, true);
         helper.CreateIndexFile(2,false);
         System.out.println("creating R*-tree");

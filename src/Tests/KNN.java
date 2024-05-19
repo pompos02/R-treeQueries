@@ -67,7 +67,7 @@ public class KNN {
 
         System.out.println("Entires found in the given region: " + queryRecords.size());
         System.out.println("writing them to outputKNNQuery.csv ");
-        Boolean write=false;
+        Boolean write=true;
         if(write){
             try (FileWriter csvWriter = new FileWriter("outputKNNQuery.csv")) {
                 // Write the CSV header

@@ -43,7 +43,7 @@ public class RangeQuery2D {
         // 7111836589,,31.72438,28.42733
         //all of malta: 14.2932,14.6000,    36.0224,35.7700
         //center 14.4343,14.4511,35.8779,35.8922
-        double off=0.01;
+        double off=0.000035 * 100;
         queryBounds.add(new Bounds(35.9-off , 35.9+off));
         queryBounds.add(new Bounds(14.4-off , 14.4+off));
         //queryBounds.add(new Bounds(34.7018620-off , 34.7018620+off));
@@ -72,7 +72,7 @@ public class RangeQuery2D {
 
 
 
-        boolean write=false;
+        boolean write=true;
         if(write){
             System.out.println("writing them to output2DRangeQuery.csv ");
             try (FileWriter csvWriter = new FileWriter("output2DRangeQuery.csv")) {
