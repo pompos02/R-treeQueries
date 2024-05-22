@@ -64,7 +64,7 @@ public class DataFileManagerNoName {
         }
 
         if (!entries.isEmpty()) {
-            System.out.println("Number of entries found in the .som file: " + entries.size());
+            System.out.println("Number of entries found in the .osm file: " + entries.size());
         }
         return entries;
     }

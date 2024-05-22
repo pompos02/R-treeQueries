@@ -103,7 +103,6 @@ public class Run2DQueries {
                 }
 
 
-
                 System.out.println("i: " + i);
             }
             i++;
@@ -150,9 +149,6 @@ public class Run2DQueries {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-
 
     }
 }

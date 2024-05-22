@@ -10,19 +10,36 @@ import java.util.List;
 
 public class SkyLine {
 
+    static RStarTree rStarTreeMaker(boolean reconstruct) throws IOException {
+        if(reconstruct){
+            System.out.println("Initializing files:");
+            List<Record> records = DataFileManagerWithName.loadDataFromFile("malta.osm");
+            helper.CreateDataFile(records,2, true);
+            helper.CreateIndexFile(2,true);
+            System.out.println("creating R*-tree");
+            RStarTree rStarTree = new RStarTree(true);
+            return rStarTree;
+        }
+        else{
+            List<Record> EmptyRecords = new ArrayList<>();
+            helper.CreateDataFile(EmptyRecords,2, false);
+            helper.CreateIndexFile(2,false);
+            System.out.println("creating R*-tree");
+            RStarTree rStarTree = new RStarTree(false);
+            return rStarTree;
+        }
+    }
+
     public static void main(String[] args) throws IOException {
 
 
-        System.out.println("Initializing files:");
-        List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
-        helper.CreateDataFile(records,2, true);
-        helper.CreateIndexFile(2,false);
-        System.out.println("creating R*-tree");
-        BulkLoadingRStarTree rStarTree = new BulkLoadingRStarTree(true);
+        boolean reconstruct = false;
+
+        RStarTree rStarTree= rStarTreeMaker(reconstruct);
 
         ArrayList<Bounds> queryBounds = new ArrayList<>();
-        queryBounds.add(new Bounds(34.7018620-0.1 , 34.7018620+0.1));
-        queryBounds.add(new Bounds(33.0449947 - 0.1, 33.0449947 + 0.1));
+        queryBounds.add(new Bounds(35.9 - 5 , 35.9 + 5));
+        queryBounds.add(new Bounds(14.4 - 5, 14.4+ 5));
         System.out.print("Starting SkyLine query: ");
         long startRangeQueryTime = System.nanoTime();
         ArrayList<LeafEntry> queryRecords = rStarTree.getSkyline(new BoundingBox(queryBounds));
@@ -41,7 +58,7 @@ public class SkyLine {
             for (LeafEntry leafRecord : queryRecords) {
                 counter++;
                 // Assuming findRecord() returns a comma-separated string "id,name,lat,lon"
-                csvWriter.append(counter + ". " + leafRecord.findRecordWithoutBlockId().toString());
+                csvWriter.append(counter + ". " + leafRecord.findRecord().toString());
                 csvWriter.append("\n");  // New line after each record
             }
         } catch (IOException e) {

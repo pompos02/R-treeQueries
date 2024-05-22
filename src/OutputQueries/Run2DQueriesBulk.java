@@ -1,5 +1,6 @@
 package OutputQueries;
 
+import SequentialQueries.SequentialNearestNeighboursQuery;
 import SequentialQueries.SequentialScanBoundingBoxRangeQuery;
 import main.java.spatialtree.*;
 import main.java.spatialtree.Record;
@@ -35,7 +36,13 @@ public class Run2DQueriesBulk {
         ArrayList<Double> centerPoint = new ArrayList<>(); // ArrayList with the coordinates of an approximate center point
         centerPoint.add(35.9); // Coordinate of second dimension
         centerPoint.add(14.4); // Coordinate of first dimension
+
+        ArrayList<Double> knncenterPoint = new ArrayList<>(); // ArrayList with the coordinates of an approximate center point
+        knncenterPoint.add(14.4); // Coordinate of second dimension
+        knncenterPoint.add(35.9); // Coordinate of first dimension
+
         double rangeIncrement = 0.000035;
+
         // ------------------------------------------------------------------------
         // Range Query Data
         ArrayList<Double> rStarRangeQueryTimes = new ArrayList<>();
@@ -45,6 +52,7 @@ public class Run2DQueriesBulk {
         // KNN Query Data
         ArrayList<Double> knnRStarTimes = new ArrayList<>();
         ArrayList<Double> knnSeqScanTimes = new ArrayList<>();
+        ArrayList<Integer> knnQueryRecords = new ArrayList<>();
 
         int i = 0;
 
@@ -67,6 +75,27 @@ public class Run2DQueriesBulk {
                 sequentialScanBoundingBoxRangeQuery.getQueryRecords();
                 long stopSequentialRangeQueryTime = System.nanoTime();
                 seqScanRangeQueryTimes.add((double) (stopSequentialRangeQueryTime - startSequentialRangeQueryTime) / 1000000);
+
+                //KNN Query
+                if (i > 0){
+                    ArrayList<Bounds> knnqueryBounds = new ArrayList<>();
+                    knnqueryBounds.add(new Bounds(knncenterPoint.get(0) , knncenterPoint.get(0)));
+                    knnqueryBounds.add(new Bounds(knncenterPoint.get(1), knncenterPoint.get(1)));
+
+                    long startKNNTime = System.nanoTime();
+                    knnQueryRecords.add(rStarTree.getNearestNeighbours(knncenterPoint, i).size());
+                    long stopKNNTime = System.nanoTime();
+                    knnRStarTimes.add((double) (stopKNNTime - startKNNTime) / 1000000);
+                    // Sequential Scan - KNN Query
+                    SequentialNearestNeighboursQuery sequentialNearestNeighboursQuery = new SequentialNearestNeighboursQuery(centerPoint, i);
+                    long startSequentialKNNQueryTime = System.nanoTime();
+                    sequentialNearestNeighboursQuery.getQueryRecords();
+                    long stopSequentialKNNQueryTime = System.nanoTime();
+                    knnSeqScanTimes.add((double) (stopSequentialKNNQueryTime - startSequentialKNNQueryTime) / 1000000);
+                }
+
+
+
                 System.out.println("i: " + i);
             }
             i++;
@@ -85,6 +114,27 @@ public class Run2DQueriesBulk {
             int j = 0;
             while (j < rStarRangeQueryTimes.size()) {
                 writer.write(String.format(rangeQueryRecords.get(j) + "," + rStarRangeQueryTimes.get(j) + "," + seqScanRangeQueryTimes.get(j) + "\n"));
+                j++;
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Writing on file (KNN)");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("KNNBulkQueryResults.csv"))) {
+            String tagString = "Returned Records" +
+                    ',' +
+                    "R* Time(ms)" +
+                    ',' +
+                    "Sequential Scan Time(ms)" +
+                    '\n';
+            writer.write(tagString);
+
+            // KNN Query File creation
+            int j = 0;
+            while(j < knnRStarTimes.size()){
+                writer.write(String.format(  knnQueryRecords.get(j) +"," +knnRStarTimes.get(j)+ "," + knnSeqScanTimes.get(j) + "\n"));
                 j++;
 
             }
