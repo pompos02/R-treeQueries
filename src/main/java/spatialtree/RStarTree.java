@@ -216,29 +216,21 @@ public class RStarTree {
                     entryAreaEnlargementPairs.add(new EntryAreaEnlargementPair(entry,areaEnlargementA));
                 }
                 entryAreaEnlargementPairs.sort(EntryAreaEnlargementPair::compareTo);
-                // Let sortedByEnlargementEntries be the group of the sorted entries
                 ArrayList<Entry> sortedByEnlargementEntries = new ArrayList<>();
                 for (EntryAreaEnlargementPair pair: entryAreaEnlargementPairs)
                     sortedByEnlargementEntries.add(pair.getEntry());
 
-                // From the items in sortedByEnlargementEntries, let A be the group of the first p entries,
-                // considering all items in the node, choosing the entry whose rectangle needs least overlap enlargement
-                //ArrayList<Entry> pFirstEntries = (ArrayList<Entry>)sortedByEnlargementEntries.subList(0, CHOOSE_SUBTREE_P_ENTRIES);
+
                 bestEntry = Collections.min(sortedByEnlargementEntries.subList(0, CHOOSE_SUBTREE_P_ENTRIES), new EntryComparator.EntryOverlapEnlargementComparator(sortedByEnlargementEntries.subList(0, CHOOSE_SUBTREE_P_ENTRIES),boundingBoxToAdd,node.getEntries()));
 
                 return bestEntry;
             }
 
-            // Choose the entry in the node whose rectangle needs least overlap enlargement to include the new data rectangle
-            // Resolve ties by choosing the entry whose rectangle needs least area enlargement,
-            // then the entry with the rectangle of smallest area
             bestEntry = Collections.min(node.getEntries(), new EntryComparator.EntryOverlapEnlargementComparator(node.getEntries(),boundingBoxToAdd,node.getEntries()));
             return bestEntry;
         }
 
-        // If the child pointers in N do not point to leaves: determine the minimum area cost],
-        // choose the leaf in N whose rectangle needs least area enlargement to include the new data
-        // rectangle. Resolve ties by choosing the leaf with the rectangle of smallest area
+
         ArrayList<EntryAreaEnlargementPair> entryAreaEnlargementPairs = new ArrayList<>();
         for (Entry entry: node.getEntries())
         {
@@ -260,7 +252,7 @@ public class RStarTree {
      * @return An entry that results from handling the overflow, which might require propagation upwards.
      */
     private Entry overFlowTreatment(Node parentNode, Entry parentEntry, Node childNode) {
-        //System.out.println("OVERFLOW TREATMENT CALLED");
+
         // If the level is not the root level and this is the first call of OverflowTreatment
         // in the given level during the insertion of one data rectangle, then reinsert
         if (childNode.getBlockId() != ROOT_NODE_BLOCK_ID && !levelsInserted[childNode.getLevel()-1])
