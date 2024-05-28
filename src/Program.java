@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import static OutputQueries.Run2DQueries.rStarTreeMaker;
 
-public class Programme {
+public class Program {
 
     public static void main(String[] args) throws IOException {
         Scanner scan = new Scanner(System.in);
