@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Run2DQueries {
-    static RStarTree rStarTreeMaker(boolean reconstruct) throws IOException {
+    public static RStarTree rStarTreeMaker(boolean reconstruct) throws IOException {
         if(reconstruct){
             System.out.println("Initializing files:");
             List<Record> records = DataFileManagerWithName.loadDataFromFile("malta.osm");
@@ -27,7 +27,6 @@ public class Run2DQueries {
             List<Record> EmptyRecords = new ArrayList<>();
             helper.CreateDataFile(EmptyRecords,2, false);
             helper.CreateIndexFile(2,false);
-            System.out.println("creating R*-tree");
             RStarTree rStarTree = new RStarTree(false);
             System.out.println("R*-tree Constructed");
             return rStarTree;
