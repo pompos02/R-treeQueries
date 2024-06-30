@@ -15,9 +15,9 @@ public class Program {
         System.out.println("Welcome! Wait until we create the R*-Tree from the existing IndexFile based on malta.osm");
         System.out.println("--------------------------------------------------------------------------------");
         RStarTree rStarTree = rStarTreeMaker(false);
-
+            System.out.println("The dimension of our data is: " + helper.getDataDimensions() );
         do {
-            System.out.println("Select the query you want:");
+            System.out.println("The Select the query you want:");
             System.out.println("1)Search for Records that overlap with a given bounding box\n2)K-NN\n3)Skyline\n0)To Exit");
             selection = scan.nextLine().trim().toLowerCase();
             System.out.println();
