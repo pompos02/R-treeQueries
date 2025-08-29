@@ -16,7 +16,7 @@ public class Run2DQueries {
     public static RStarTree rStarTreeMaker(boolean reconstruct) throws IOException {
         if(reconstruct){
             System.out.println("Initializing files:");
-            List<Record> records = DataFileManagerWithName.loadDataFromFile("malta.osm");
+            List<Record> records = DataFileManagerNoName.loadDataFromFile("malta.osm");
             helper.CreateDataFile(records,2, true);
             helper.CreateIndexFile(2,true);
             System.out.println("creating R*-tree");

@@ -1,132 +1,182 @@
-# Spatial Access R*-Tree
+# R-tree Spatial Queries
 
-Spatial Access is a Java implementation of the R*-Tree spatial index. It provides tools to parse OpenStreetMap (`.osm`) files into a binary data format, construct an R*-Tree index, and execute spatial queries such as range search, k-nearest neighbours, and skyline queries. The project also includes sequential-scan implementations for benchmarking and an interactive command line interface.
+A Java implementation of an R\*-tree spatial index for efficient querying of OpenStreetMap (OSM) data, with support for range queries, k-nearest neighbor searches, and skyline queries.
 
-## Features
+## Prerequisites
 
-- **Persistent R*-Tree** stored in `indexfile.dat` and `datafile.dat` using custom binary blocks.
-- **Bounding Box Range Query**, **K-NN Query**, and **Skyline Query** implementations.
-- **Bulk Loading** support for efficient tree construction from large datasets.
-- **Sequential Scan Queries** to compare against indexed performance.
-- **CLI Program** (`Program`) for interactive querying and CSV export.
-- **Example tests and benchmarks** under `src/Tests` and `src/OutputQueries`.
+- Java 8 or higher
+- An OpenStreetMap (.osm) XML file
 
-## Architecture Overview
+## Setup
+
+1. **Place your OSM file**: Download an `.osm` file from [OpenStreetMap](https://www.openstreetmap.org/) and place it in the project root directory with the name `malta.osm` (or modify the code to use your filename).
+
+2. **Compile the project**:
+   ```bash
+   cd src
+   javac -cp . **/*.java
+   ```
+
+## Data Pipeline
+
+The application follows a three-stage pipeline:
+
+```
+OSM File (.osm) → DataFile (datafile.dat) → IndexFile (indexfile.dat)
+```
+
+### Stage 1: OSM Parsing
+
+- **Input**: OpenStreetMap XML file containing spatial data
+- **Processors**:
+  - `DataFileManagerWithName`: Extracts named locations only
+  - `DataFileManagerNoName`: Extracts all coordinate points
+- **Output**: List of `Record` objects with coordinates and metadata
+
+### Stage 2: DataFile Creation
+
+- **Process**: `helper.CreateDataFile()`
+- **Function**: Organizes records into 32KB blocks for efficient storage
+- **Output**: `datafile.dat` - Binary file containing serialized spatial records
+- **Location**: Generated in `src/` directory
+
+### Stage 3: IndexFile Creation
+
+- **Process**: R\*-tree construction via `RStarTree` or `BulkLoadingRStarTree`
+- **Function**: Builds spatial index structure pointing to datafile blocks
+- **Output**: `indexfile.dat` - Binary file containing R\*-tree nodes
+- **Location**: Generated in `src/` directory
+
+## Architecture Types
+
+### 1. Standard R\*-tree (Incremental Loading)
+
+- **Class**: `RStarTree`
+- **Method**: Records inserted one-by-one with dynamic tree restructuring
+- **Data Manager**: `DataFileManagerNoName` (named locations only)
+- **Characteristics**:
+  - Smaller dataset (~9K records for Malta)
+  - Dynamic insertion with overflow treatment
+  - Supports insertions after initial construction
+
+### 2. Bulk Loading R\*-tree
+
+- **Class**: `BulkLoadingRStarTree`
+- **Method**: Sorts all records and builds tree bottom-up
+- **Data Manager**: `DataFileManagerNoName` (all coordinate points)
+- **Characteristics**:
+  - Larger dataset (~729K records for Malta)
+  - More efficient initial construction
+  - Better space utilization
+
+## Query Types
+
+### Range Query (`BoundingBoxRangeQuery`)
+
+Finds all points within a rectangular bounding box.
+
+### K-Nearest Neighbors (`NearestNeighboursQuery`)
+
+Finds the k closest points to a given coordinate.
+
+### Skyline Query (`SkylineQuery`)
+
+Identifies non-dominated points within a bounding box region.
+
+## Test Classes
+
+### Core Tests (in `src/Tests/`)
+
+- **`RangeQuery2D`**: Benchmarks R-tree vs sequential scan for range queries
+- **`RangeQuery2DBulkLoad`**: Same benchmark using bulk-loaded R-tree
+- **`KNN`**: K-nearest neighbor query testing (standard R-tree)
+- **`KNNBulk`**: K-nearest neighbor query testing (bulk-loaded R-tree)
+- **`SkyLine`**: Skyline query demonstration
+- **`RecordDeletion`/`RecordDeletionBulk`**: Record deletion operations
+
+### Output Generation (in `src/OutputQueries/`)
+
+- **`Run2DQueries`**: Interactive query execution with CSV output
+- **`Run2DQueriesBulk`**: Same functionality with bulk-loaded tree
+
+## Running Examples
+
+### Benchmark R-tree vs Sequential Scan
+
+```bash
+cd src
+java Tests.RangeQuery2D
+```
+
+Output shows performance comparison between indexed and sequential searches.
+
+### Interactive Queries
+
+```bash
+cd src
+java OutputQueries.Run2DQueries
+```
+
+Provides interactive interface for running different query types.
+
+### Bulk Loading Performance
+
+```bash
+cd src
+java Tests.RangeQuery2DBulkLoad
+```
+
+Demonstrates bulk-loaded R-tree performance characteristics.
+
+## File Structure
 
 ```
 src/
- ├── main/java/spatialtree/    # Core R*-Tree implementation and utilities
- ├── queries/                  # Query classes executed on the tree
- ├── SequentialQueries/        # Non-indexed query variants
- ├── OutputQueries/            # Benchmarking utilities
- ├── Tests/                    # Example programs/tests
- └── Program.java              # Interactive command line interface
+├── main/java/spatialtree/     # Core R-tree implementation
+│   ├── RStarTree.java         # Standard R*-tree
+│   ├── BulkLoadingRStarTree.java # Bulk loading R*-tree
+│   ├── helper.java            # File I/O and utilities
+│   └── DataFileManager*.java  # OSM parsing
+├── queries/                   # Query implementations
+│   ├── BoundingBoxRangeQuery.java
+│   ├── NearestNeighboursQuery.java
+│   └── SkylineQuery.java
+├── SequentialQueries/         # Brute-force comparison
+├── Tests/                     # Test and benchmark classes
+└── OutputQueries/             # Interactive query tools
 ```
 
-Key components:
+## Performance Notes
 
-- **RStarTree** – main tree structure supporting insert, delete, and query operations.
-- **BulkLoadingRStarTree** – builds the tree directly from a list of records.
-- **helper** – handles persistence, file metadata and block management.
-- **DataFileManagerWithName / DataFileManagerNoName** – parse `.osm` files via StAX into `Record` objects.
-- **Node/Entry/LeafEntry** – building blocks of the tree stored in index blocks.
+- **Standard R-tree**: Better for smaller, named-location datasets
+- **Block size**: Fixed at 32KB for optimal I/O performance
+- **Sequential vs Indexed**: R-tree provides significant speedup for selective queries
 
-Queries are implemented in the `queries` package, while sequential-scan versions are placed in `SequentialQueries`.
+## Generated Files
 
-## Installation
+When you run the applications, the following files are generated in the `src/` directory:
 
-1. **Prerequisites** – JDK 8 or later and the standard `javac`/`java` tools.
-2. **Clone the repository** and ensure the sample data file (`map.osm`) is present in the root directory.
-3. **Compile the source**:
+- `datafile.dat`: Binary file containing spatial records organized in 32KB blocks
+- `indexfile.dat`: Binary file containing the R\*-tree index structure (must be specifies in the source code)
+- `output2DRangeQuery.csv`: CSV output from range query results (when enabled)
+- `output2DRangeQueryBulkLoaded.csv`: CSV output from bulk-loaded range queries
 
-```bash
-$ mkdir -p out
-$ javac $(find src -name '*.java') -d out
-```
+## Troubleshooting
 
-This produces class files under `out/`.
+### "Block size read was not of 32768bytes" Error
 
-## Usage
+This indicates a corrupted or incomplete index file. Solutions:
 
-### Interactive CLI
+1. Delete `indexfile.dat` and run the program again to rebuild
+2. Ensure the OSM file exists and is accessible
+3. Set `reconstruct = true` in test classes to force rebuilding
 
-Run the main `Program` class. It initializes the tree (creating `datafile.dat` and `indexfile.dat` if necessary) and prompts for query selection:
+### "FileNotFoundException: malta.osm"
 
-```bash
-$ java -cp out Program
-```
+Place your OSM file in the correct directory (project root) or modify the file path in the source code.
 
-The menu offers:
+### Different Record Counts
 
-1. Range search with user-provided bounds
-2. K-NN search
-3. Skyline query
-0. Exit
-
-Results can optionally be exported to CSV files (e.g., `output2DRangeQuery.csv`).
-
-### Benchmark and Bulk Examples
-
-- `OutputQueries/Run2DQueries` – constructs a tree and repeatedly issues queries while logging performance to CSV.
-- `OutputQueries/Run2DQueriesBulk` – performs the same using the bulk-loading implementation.
-- Programs in `src/Tests` demonstrate deletion and additional query scenarios.
-
-To run any of these, compile as shown above and execute the desired class using `java -cp out <ClassName>`.
-
-## Configuration
-
-Paths and block size are defined in `helper`:
-
-```java
-protected static final String PATH_TO_DATAFILE = "datafile.dat";
-protected static final String PATH_TO_INDEXFILE = "indexfile.dat";
-protected static final int BLOCK_SIZE = 32 * 1024; // bytes
-```
-
-Modify these constants if you wish to store files elsewhere or adjust block size. The tree dimensionality is inferred from the data at creation time.
-
-## Testing
-
-There are no automated unit tests, but the project can be built and sample programs executed to verify functionality. A typical compilation run prints warnings only:
-
-```
-$ javac $(find src -name '*.java') -d out
-Note: src/main/java/spatialtree/helper.java uses unchecked or unsafe operations.
-Note: Recompile with -Xlint:unchecked for details.
-```
-
-Running `Program` produces the query menu as confirmation that the tree was successfully created.
-
-## Deployment
-
-The project is distributed as source. After compilation, the generated class files can be packaged into a JAR if desired. No CI/CD configuration is provided.
-
-## API Documentation
-
-Important methods of `RStarTree`:
-
-- `getDataInBoundingBox(BoundingBox)` – returns `LeafEntry` objects overlapping the given box.
-- `getNearestNeighbours(List<Double> searchPoint, int k)` – returns the k closest entries to a point.
-- `getSkyline(BoundingBox)` – returns non-dominated entries within a region.
-- `deleteRecord(Entry)` – removes a record from the tree.
-
-`BulkLoadingRStarTree` exposes similar query methods and builds the tree using `bulkLoadTree`.
-
-Each query class in the `queries` package provides a `getQueryRecords` method executed on a `Node`.
-
-## Contributing
-
-1. Fork the repository and create a new branch for your feature or fix.
-2. Ensure the project builds with `javac` and that example programs still run.
-3. Submit a pull request describing your changes.
-
-Please follow the existing code style (spaces for indentation, descriptive comments) and keep the source compilable with Java 8+.
-
-## License
-
-No explicit license file is present. All rights reserved by the original authors.
-
-## Credits
-
-- OpenStreetMap data (sample `map.osm`) used for demonstration.
-- Java Standard Library and StAX API for XML parsing.
+- `DataFileManagerNoName` extracts only named locations (~9K for Malta)
+- `DataFileManagerNoName` extracts all coordinates (~729K for Malta)
+- Choose the appropriate manager based on your use case
