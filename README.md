@@ -7,16 +7,6 @@ A Java implementation of an R\*-tree spatial index for efficient querying of Ope
 - Java 8 or higher
 - An OpenStreetMap (.osm) XML file
 
-## Setup
-
-1. **Place your OSM file**: Download an `.osm` file from [OpenStreetMap](https://www.openstreetmap.org/) and place it in the project root directory with the name `malta.osm` (or modify the code to use your filename).
-
-2. **Compile the project**:
-   ```bash
-   cd src
-   javac -cp . **/*.java
-   ```
-
 ## Data Pipeline
 
 The application follows a three-stage pipeline:
@@ -83,74 +73,44 @@ Finds the k closest points to a given coordinate.
 
 Identifies non-dominated points within a bounding box region.
 
-## Test Classes
+## Performance Analysis Results
 
-### Core Tests (in `src/Tests/`)
+The performance results are derived from running the `Run2DQueries.java` script, which benchmarks the R\* tree against sequential scan for range and k-nearest neighbor (KNN) queries using variable parameters:
 
-- **`RangeQuery2D`**: Benchmarks R-tree vs sequential scan for range queries
-- **`RangeQuery2DBulkLoad`**: Same benchmark using bulk-loaded R-tree
-- **`KNN`**: K-nearest neighbor query testing (standard R-tree)
-- **`KNNBulk`**: K-nearest neighbor query testing (bulk-loaded R-tree)
-- **`SkyLine`**: Skyline query demonstration
-- **`RecordDeletion`/`RecordDeletionBulk`**: Record deletion operations
+- **Range Queries**: Iteratively increases the query bounding box size (starting from a small area and expanding) to test performance across different selectivity levels (number of returned records). Each iteration runs a range query on the R\* tree and a sequential scan, measuring execution times.
+- **KNN Queries**: Varies the value of k (number of nearest neighbors) from 100 to 9,900, running KNN queries on the R\* tree and sequential scan for each k value.
 
-### Output Generation (in `src/OutputQueries/`)
+This setup allows comparison of query performance as the query becomes less selective (more records returned for range queries) or as k increases (more neighbors for KNN queries). The results highlight when spatial indexing provides benefits over brute-force scanning.
 
-- **`Run2DQueries`**: Interactive query execution with CSV output
-- **`Run2DQueriesBulk`**: Same functionality with bulk-loaded tree
+Based on these benchmark runs:
 
-## Running Examples
+### Range Query Performance
 
-### Benchmark R-tree vs Sequential Scan
+- **Total Iterations**: 100
+- **Average R\* Tree Time**: 538.21 ms
+- **Average Sequential Scan Time**: 459.65 ms
+- **Average Speedup (Sequential / R\*)**: 0.85x (sequential is faster on average for large ranges)
+- **Returned Records Range**: 0 to 728,398
+- **Observation**: For small ranges (few returned records), R\* tree is faster due to indexing. For large ranges (many records), sequential scan can be faster as it avoids index overhead.
 
-```bash
-cd src
-java Tests.RangeQuery2D
-```
+![Range Query Comparison](outputGraphs/range_query_comparison.png)
 
-Output shows performance comparison between indexed and sequential searches.
+![Range Query Speedup](outputGraphs/range_query_speedup.png)
 
-### Interactive Queries
+### K-Nearest Neighbors (KNN) Query Performance
 
-```bash
-cd src
-java OutputQueries.Run2DQueries
-```
+- **Total Iterations**: 99
+- **Average R\* Tree Time**: 16.82 ms
+- **Average Sequential Scan Time**: 449.21 ms
+- **Average Speedup (Sequential / R\*)**: 26.71x (R\* tree is significantly faster)
+- **Returned Records Range**: 100 to 9,900 (k values)
+- **Observation**: R\* tree consistently outperforms sequential scan for KNN queries, with speedup increasing as k grows. This demonstrates the effectiveness of spatial indexing for proximity searches.
 
-Provides interactive interface for running different query types.
+![KNN Query Comparison](outputGraphs/knn_query_comparison.png)
 
-### Bulk Loading Performance
+![KNN Query Speedup](outputGraphs/knn_query_speedup.png)
 
-```bash
-cd src
-java Tests.RangeQuery2DBulkLoad
-```
-
-Demonstrates bulk-loaded R-tree performance characteristics.
-
-## File Structure
-
-```
-src/
-├── main/java/spatialtree/     # Core R-tree implementation
-│   ├── RStarTree.java         # Standard R*-tree
-│   ├── BulkLoadingRStarTree.java # Bulk loading R*-tree
-│   ├── helper.java            # File I/O and utilities
-│   └── DataFileManager*.java  # OSM parsing
-├── queries/                   # Query implementations
-│   ├── BoundingBoxRangeQuery.java
-│   ├── NearestNeighboursQuery.java
-│   └── SkylineQuery.java
-├── SequentialQueries/         # Brute-force comparison
-├── Tests/                     # Test and benchmark classes
-└── OutputQueries/             # Interactive query tools
-```
-
-## Performance Notes
-
-- **Standard R-tree**: Better for smaller, named-location datasets
-- **Block size**: Fixed at 32KB for optimal I/O performance
-- **Sequential vs Indexed**: R-tree provides significant speedup for selective queries
+These results highlight that R\* trees excel in selective queries (small ranges or specific k values) but may not provide benefits for very large, unselective queries where sequential scanning is more efficient.
 
 ## Generated Files
 
